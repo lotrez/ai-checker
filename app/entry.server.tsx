@@ -1,6 +1,5 @@
 import { isbot } from "isbot";
-// @ts-ignore
-import { renderToReadableStream } from "react-dom/server.browser";
+import { renderToReadableStream } from "react-dom/server";
 import type { AppLoadContext, EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 import { setContext } from "./load-context";
@@ -20,7 +19,7 @@ export default async function handleRequest(
 		<ServerRouter context={routerContext} url={request.url} />,
 		{
 			signal: request.signal,
-			onError(error: Error) {
+			onError(error: unknown) {
 				// biome-ignore lint/style/noParameterAssign: It's ok
 				status = 500;
 			},

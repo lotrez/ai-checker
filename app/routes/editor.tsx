@@ -1,7 +1,7 @@
-import { useState } from "react";
 import Viewer from "~/components/editor/viewer";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
+import EditorContextProvider, { EditorContext } from "~/context/editor-context";
 import type { Route } from "./+types/editor";
 
 export function meta({}: Route.MetaArgs) {
@@ -16,29 +16,28 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Editor() {
-	const [text, setText] = useState(DEFAULT_TEXT);
 	return (
-		<div className="grid gap-4 grid-cols-2 mx-auto w-full md:max-w-[1200px] mt-12">
-			<Card className="flex flex-col">
-				<CardHeader>
-					<CardTitle>Edit your text</CardTitle>
-				</CardHeader>
-				<CardContent className="flex-1">
-					<Textarea
-						value={text}
-						className="min-h-[500px] h-full"
-						onChange={(v) => setText(v.currentTarget.value)}
-					/>
-				</CardContent>
-			</Card>
+		<EditorContextProvider>
+			<EditorContext.Consumer>
+				{(editorContext) => (
+					<div className="grid gap-4 grid-cols-2 mx-auto w-full md:max-w-[1200px] mt-12">
+						<Card className="flex flex-col">
+							<CardHeader>
+								<CardTitle>Edit your text</CardTitle>
+							</CardHeader>
+							<CardContent className="flex-1">
+								<Textarea
+									value={editorContext.text}
+									className="min-h-[500px] h-full"
+									onChange={(v) => editorContext.setText(v.currentTarget.value)}
+								/>
+							</CardContent>
+						</Card>
 
-			<Viewer text={text} />
-		</div>
+						<Viewer text={editorContext.text} />
+					</div>
+				)}
+			</EditorContext.Consumer>
+		</EditorContextProvider>
 	);
 }
-
-const DEFAULT_TEXT = `
-Bonjour, je m'appelle Lucien.
-
-Caca pipi
-`;

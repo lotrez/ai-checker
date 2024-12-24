@@ -8,7 +8,8 @@
     "wdev": "wrangler dev",
     "gen": "wrangler types && react-router typegen && react-router routes",
     "start": "cross-env NODE_ENV=production react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.0.12",
