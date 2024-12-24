@@ -1,5 +1,6 @@
 import { experimental_useObject as useObject } from "ai/react";
 import { useEffect, useMemo } from "react";
+import { useDebounce } from "use-debounce";
 import type { z } from "zod";
 import { ANALYSIS_SCHEMA } from "~/routes/api/analyze-paragraph";
 import ErrorPopover from "./error-popover";
@@ -52,17 +53,19 @@ export function removeOverlappingErrors(
 export default function Paragraph({ text }: { text: string }) {
 	const { object, submit, stop, isLoading } = useObject({
 		api: "/api/analyze-paragraph",
-
 		schema: ANALYSIS_SCHEMA,
 		headers: new Headers({
 			"Content-Type": "application/json",
 		}),
 	});
+
+	const [debouncedText] = useDebounce(text, 500);
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		stop();
-		submit({ text });
-	}, [text]);
+		if (debouncedText.trim() !== "") submit({ text: debouncedText });
+	}, [debouncedText]);
 
 	const renderedText = useMemo(() => {
 		if (object?.errors && object?.errors.length > 0) {

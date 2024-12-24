@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import Paragraph from "./paragraph";
 
-export default function Viewer({ text }: { text: string }) {
-	const [paragraphs, setParagraphs] = useState([]);
-
+export default function Viewer({
+	text,
+}: {
+	text: string;
+}) {
 	const splitText = useMemo(() => {
 		// Split on double newlines and filter empty paragraphs
 		const splits = text.split(/\n\s*\n/).filter((p) => p.trim());

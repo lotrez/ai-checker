@@ -1,0 +1,33 @@
+{
+  "name": "ai-checker",
+  "main": "./server.ts",
+  "compatibility_date": "2024-03-04",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV_AI_CACHE",
+      "id": "9309ac8c27de447798bcfb8c9c988080",
+      "preview_id": "3a84ddb270e540a8bbb284ffa1edbbe1"
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "placement": {
+    "mode": "off"
+  },
+  "vars": {
+    "ENVIRONMENT": "PRODUCTION"
+  },
+  "assets": {
+    "directory": "./build/client"
+  },
+  "build": {
+    "command": "npm run build"
+  }
+}
