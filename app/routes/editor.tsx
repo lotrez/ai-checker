@@ -20,7 +20,7 @@ export default function Editor() {
 		<EditorContextProvider>
 			<EditorContext.Consumer>
 				{(editorContext) => (
-					<div className="grid gap-4 grid-cols-2 mx-auto w-full md:max-w-[1200px] mt-12">
+					<div className="grid gap-4 grid-cols-2 mx-auto w-full md:max-w-[1200px] h-full">
 						<Card className="flex flex-col">
 							<CardHeader>
 								<CardTitle>Edit your text</CardTitle>
