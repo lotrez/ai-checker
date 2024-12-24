@@ -1,8 +1,11 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import type { KVNamespace } from "@cloudflare/workers-types";
 import { streamObject } from "ai";
 import { ollama } from "ollama-ai-provider";
 import { z } from "zod";
+import { getContext } from "~/load-context";
 import type { Route } from "./+types/analyze-paragraph";
+
 const ERROR_POSITION = z.object({
 	errorText: z.string().describe("The text you found to be incorrect."),
 });
@@ -35,12 +38,20 @@ export const ANALYSIS_SCHEMA = z.object({
 	errors: z.array(ERROR_UNION),
 });
 
-const SYSTEM_PROMPT = `You are a professional text analyzer specializing in identifying and correcting grammar errors, improving sentence structure, and detecting potential AI-generated text. Your task is to evaluate one paragraph at a time based on these criteria:
+const SYSTEM_PROMPT = (
+	env: string,
+) => `You are a professional text analyzer specializing in identifying and correcting grammar errors, improving sentence structure, and detecting potential AI-generated text. Your task is to evaluate one paragraph at a time based on these criteria:
 1. **Grammar and Syntax**: Identify and correct any grammatical, spelling, or punctuation errors.
 2. **Stylistic Improvements**: Highlight poorly worded sentences or awkward phrasing and suggest more effective alternatives.
 3. **AI-Generated Content Detection**: Analyze the paragraph for patterns or language styles that may indicate AI authorship and provide an explanation for your assessment.
 Provide your feedback in a structured format with actionable insights and corrections.
-`;
+Try to not get overlapping errors.
+${
+	env === "PRODUCTION"
+		? `Return only a plain JSON object without including it in a code block with markdown formatting. 
+Just a plain JSON object. Do not include any markdown formatting in your response.`
+		: ""
+}`;
 
 const getMessagePrompt = (text: string) => {
 	return `Analyze the following paragraph based on the following criteria:
@@ -53,27 +64,41 @@ ${text}
 `;
 };
 
-const google = createGoogleGenerativeAI({
-	apiKey: process.env.VERTEX_KEY,
+const workersai = (API_KEY: string) =>
+	createOpenAICompatible({
+		name: "workers-ai",
+		headers: {
+			Authorization: "Bearer Es0gDtGd3F2sM5TZRA2l8AtOFX012i0TYQN5oe2L",
+		},
+		baseURL: `https://gateway.ai.cloudflare.com/v1/${API_KEY}/ai-checker/workers-ai/v1/`,
+	});
+
+const ANALYZE_ACTION_SCHEMA = z.object({
+	text: z.string(),
 });
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
+	const redis = context.cloudflare.env.KV_AI_CACHE as KVNamespace;
 	const jsonBody = await request.json();
-	const paragraph = jsonBody.text;
+	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody);
 	if (!paragraph) return Error("No text");
-	console.log(SYSTEM_PROMPT, getMessagePrompt(paragraph));
+	const env = getContext().cloudflare.env.ENVIRONMENT;
 	const object = streamObject({
 		model:
-			process.env.AI_PROVIDER === "ollama"
+			env !== "PRODUCTION"
 				? ollama("llama3.1", {})
-				: google("gemini-1.5-flash-8b", {
-						structuredOutputs: false,
-					}),
+				: workersai(getContext().cloudflare.env.CF_API_KEY)(
+						"@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+						{
+							simulateStreaming: true,
+						},
+					),
 		schemaName: "Analysis",
 		schemaDescription: "Analysis results",
 		schema: ANALYSIS_SCHEMA,
 		prompt: getMessagePrompt(paragraph.toString()),
-		system: SYSTEM_PROMPT,
+		system: SYSTEM_PROMPT(env),
+		mode: env !== "PRODUCTION" ? "auto" : "json",
 	});
 	return new Response(object.textStream, {
 		headers: {

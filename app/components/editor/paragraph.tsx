@@ -1,5 +1,6 @@
 import { experimental_useObject as useObject } from "ai/react";
 import { useEffect, useMemo } from "react";
+import { useDebounce } from "use-debounce";
 import type { z } from "zod";
 import { ANALYSIS_SCHEMA } from "~/routes/api/analyze-paragraph";
 import ErrorPopover from "./error-popover";
@@ -58,11 +59,14 @@ export default function Paragraph({ text }: { text: string }) {
 			"Content-Type": "application/json",
 		}),
 	});
+
+	const [debouncedText] = useDebounce(text, 1000);
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		stop();
-		submit({ text });
-	}, [text]);
+		if (debouncedText.trim() !== "") submit({ text: debouncedText });
+	}, [debouncedText]);
 
 	const renderedText = useMemo(() => {
 		if (object?.errors && object?.errors.length > 0) {
