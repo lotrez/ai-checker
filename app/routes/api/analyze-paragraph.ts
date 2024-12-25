@@ -48,8 +48,10 @@ Try to not get overlapping errors. Answer in the same language as the one provid
 You will write any fix or proposition with greater burstiness and perplexity than usual.
 ${
 	env === "PRODUCTION"
-		? `Return only a plain JSON object without including it in a code block with markdown formatting. 
-Just a plain JSON object. Do not include any markdown formatting in your response.`
+		? `**IMPORTANT**
+Return only a plain JSON object. 
+Do not include any markdown formatting in your response.
+Do not say anything other than the JSON requested.`
 		: ""
 }`;
 

@@ -54,24 +54,24 @@ export function simulateReadableStream<T>({
 export const getModel = (context: AppLoadContext) => {
 	const env = context.cloudflare.env.ENVIRONMENT;
 	const model =
-		env === "PRODUCTION"
+		env !== "PRODUCTION"
 			? ollama("llama3.1", {})
 			: workersai(
 					context.cloudflare.env.CLOUDFLARE_API_KEY,
 					context.cloudflare.env.CLOUDFLARE_ACCOUNT_ID,
-				)("@cf/meta/llama-3.3-70b-instruct-fp8");
+				)("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+	// return model;
 	const cache = context.cloudflare.env.KV_AI_CACHE;
 	return wrapLanguageModel({
 		model,
 		middleware: {
 			wrapGenerate: async ({ doGenerate, params }) => {
 				const cacheKey = createHash(JSON.stringify(params));
-
 				const cached = (await cache.get(cacheKey)) as Awaited<
 					ReturnType<LanguageModelV1["doGenerate"]>
 				> | null;
-
 				if (cached !== null) {
+					console.log("Cached!");
 					return {
 						...cached,
 						response: {
@@ -82,22 +82,18 @@ export const getModel = (context: AppLoadContext) => {
 						},
 					};
 				}
-
 				const result = await doGenerate();
-
 				cache.put(cacheKey, JSON.stringify(result));
-
 				return result;
 			},
 			wrapStream: async ({ doStream, params }) => {
 				const cacheKey = createHash(JSON.stringify(params));
 				console.log({ cacheKey });
-
 				// Check if the result is in the cache
 				const cached = await cache.get(cacheKey);
-				console.log({ cached });
 				// If cached, return a simulated ReadableStream that yields the cached result
 				if (cached !== null) {
+					console.log("Cached!");
 					// Format the timestamps in the cached response
 					const formattedChunks = (
 						JSON.parse(cached) as LanguageModelV1StreamPart[]
@@ -116,12 +112,9 @@ export const getModel = (context: AppLoadContext) => {
 						rawCall: { rawPrompt: null, rawSettings: {} },
 					};
 				}
-
 				// If not cached, proceed with streaming
 				const { stream, ...rest } = await doStream();
-
 				const fullResponse: LanguageModelV1StreamPart[] = [];
-
 				const transformStream = new TransformStream<
 					LanguageModelV1StreamPart,
 					LanguageModelV1StreamPart
@@ -131,13 +124,10 @@ export const getModel = (context: AppLoadContext) => {
 						controller.enqueue(chunk);
 					},
 					async flush() {
-						// console.log("Setting to cache", fullResponse);
 						// Store the full response in the cache after streaming is complete
 						cache.put(cacheKey, JSON.stringify(fullResponse));
-						// console.log("rading cache", await cache.get(cacheKey));
 					},
 				});
-
 				return {
 					stream: stream.pipeThrough(transformStream),
 					...rest,

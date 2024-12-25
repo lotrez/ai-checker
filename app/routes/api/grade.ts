@@ -67,7 +67,8 @@ Any fix you suggest will be written with greater burstiness and perplexity than 
 ${
 	env === "PRODUCTION"
 		? `Return only a plain JSON object without including it in a code block with markdown formatting. 
-Just a plain JSON object. Do not include any markdown formatting in your response.`
+Just a plain JSON object. Do not include any markdown formatting in your response. 
+Do not say anything other than the JSON requested.`
 		: ""
 }`;
 
