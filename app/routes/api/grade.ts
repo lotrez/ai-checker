@@ -1,37 +1,10 @@
 import { streamObject } from "ai";
 import { z } from "zod";
 import { getMode, getModel, returnObjectStream } from "~/lib/ai";
-import type { Route } from "./+types/analyze-paragraph";
+import type { Route } from "./+types/grade";
 
-const ERROR_POSITION = z.object({
-	errorText: z.string().describe("The text you found to be incorrect."),
-});
-
-export const ERROR_UNION = z.discriminatedUnion("type", [
-	z.object({
-		type: z.literal("GRAMMAR_ERROR"),
-		reasoning: z.string(),
-		position: ERROR_POSITION,
-		propositions: z
-			.array(z.string())
-			.min(1)
-			.max(5)
-			.describe("Your proposed fixes for the bad grammar."),
-	}),
-	z.object({
-		type: z.literal("STYLE_IMPROVEMENT"),
-		reasoning: z.string(),
-		propositions: z
-			.array(z.string())
-			.min(1)
-			.max(5)
-			.describe("Your proposed fixes for the bad wording."),
-		position: ERROR_POSITION,
-	}),
-]);
-
-export const ANALYSIS_SCHEMA = z.object({
-	errors: z.array(ERROR_UNION),
+const GRADE_SCHEMA = z.object({
+	aiDoubts: z.object({}),
 });
 
 const SYSTEM_PROMPT = (
@@ -59,22 +32,20 @@ ${text}
 `;
 };
 
-const ANALYZE_ACTION_SCHEMA = z.object({
+const GRADE_ACTION_SCHEMA = z.object({
+	instructions: z.string().optional(),
 	text: z.string(),
 });
 
 export async function action({ request, context }: Route.ActionArgs) {
-	const jsonBody = await request.json();
-	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
-	console.log({ paragraph });
-	if (!paragraph) return Error("No text");
+	const body = GRADE_ACTION_SCHEMA.parse(await request.json());
 	const env = context.cloudflare.env.ENVIRONMENT;
 	const object = streamObject({
 		model: getModel(context),
-		schemaName: "Analysis",
-		schemaDescription: "Analysis results",
-		schema: ANALYSIS_SCHEMA,
-		prompt: getMessagePrompt(paragraph.toString()),
+		schemaName: "Grade",
+		schemaDescription: "Grading results",
+		schema: GRADE_SCHEMA,
+		prompt: getMessagePrompt(body.text),
 		system: SYSTEM_PROMPT(env),
 		mode: getMode(context),
 	});

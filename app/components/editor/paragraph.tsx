@@ -50,7 +50,14 @@ export function removeOverlappingErrors(
 	return filteredErrors;
 }
 
-export default function Paragraph({ text }: { text: string }) {
+export default function Paragraph({
+	text,
+	handleAcceptProposition,
+}: {
+	text: string;
+
+	handleAcceptProposition: (proposedText: string, oldText: string) => void;
+}) {
 	const { object, submit, stop, isLoading } = useObject({
 		api: "/api/analyze-paragraph",
 		schema: ANALYSIS_SCHEMA,
@@ -89,6 +96,7 @@ export default function Paragraph({ text }: { text: string }) {
 				// maintenant ajouter la nouvelle erreur
 				elements.push(
 					<ErrorPopover
+						handleAcceptProposition={handleAcceptProposition}
 						error={error as z.infer<typeof ANALYSIS_SCHEMA>["errors"][number]}
 						text={text.substring(position.start, position.end)}
 						key={`${position.start}-${position.end}-${error.type}`}
@@ -106,7 +114,7 @@ export default function Paragraph({ text }: { text: string }) {
 			return elements;
 		}
 		return [<span key={"whole-text"}>{text}</span>];
-	}, [object?.errors, text]);
+	}, [object?.errors, text, handleAcceptProposition]);
 
 	return (
 		<p
