@@ -54,12 +54,12 @@ export function simulateReadableStream<T>({
 export const getModel = (context: AppLoadContext) => {
 	const env = context.cloudflare.env.ENVIRONMENT;
 	const model =
-		env !== "PRODUCTION"
+		env === "PRODUCTION"
 			? ollama("llama3.1", {})
 			: workersai(
 					context.cloudflare.env.CLOUDFLARE_API_KEY,
 					context.cloudflare.env.CLOUDFLARE_ACCOUNT_ID,
-				)("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+				)("@cf/meta/llama-3.3-70b-instruct-fp8");
 	const cache = context.cloudflare.env.KV_AI_CACHE;
 	return wrapLanguageModel({
 		model,
