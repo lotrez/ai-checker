@@ -11,7 +11,6 @@ export default async function handleRequest(
 	_loadContext: AppLoadContext,
 ) {
 	const userAgent = request.headers.get("user-agent");
-	console.log(await _loadContext.cloudflare.env.KV_AI_CACHE.list());
 	const stream = await renderToReadableStream(
 		<ServerRouter context={routerContext} url={request.url} />,
 		{
