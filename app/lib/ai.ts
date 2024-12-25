@@ -7,8 +7,6 @@ import type {
 import { experimental_wrapLanguageModel as wrapLanguageModel } from "ai";
 import { ollama } from "ollama-ai-provider";
 import type { AppLoadContext } from "react-router";
-
-import { simulateReadableStream } from "ai/test";
 import { createHash } from "./hash";
 
 const workersai = (API_KEY: string, ACCOUNT_ID: string) =>
@@ -19,6 +17,39 @@ const workersai = (API_KEY: string, ACCOUNT_ID: string) =>
 		},
 		baseURL: `https://gateway.ai.cloudflare.com/v1/${ACCOUNT_ID}/ai-checker/workers-ai/v1/`,
 	});
+
+export async function delay(delayInMs?: number): Promise<void> {
+	return delayInMs === undefined
+		? Promise.resolve()
+		: new Promise((resolve) => setTimeout(resolve, delayInMs));
+}
+
+export function simulateReadableStream<T>({
+	chunks,
+	initialDelayInMs = 0,
+	chunkDelayInMs = 0,
+	_internal,
+}: {
+	chunks: T[];
+	initialDelayInMs?: number;
+	chunkDelayInMs?: number;
+	_internal?: {
+		delay?: (ms: number) => Promise<void>;
+	};
+}): ReadableStream<T> {
+	let index = 0;
+
+	return new ReadableStream({
+		async pull(controller) {
+			if (index < chunks.length) {
+				await delay(index === 0 ? initialDelayInMs : chunkDelayInMs);
+				controller.enqueue(chunks[index++]);
+			} else {
+				controller.close();
+			}
+		},
+	});
+}
 
 export const getModel = (context: AppLoadContext) => {
 	const env = context.cloudflare.env.ENVIRONMENT;
