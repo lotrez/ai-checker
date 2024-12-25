@@ -9,14 +9,22 @@ import { ollama } from "ollama-ai-provider";
 import type { AppLoadContext } from "react-router";
 import { createHash } from "./hash";
 
-const workersai = (API_KEY: string, ACCOUNT_ID: string) =>
-	createOpenAICompatible({
+const workersai = (API_KEY: string, ACCOUNT_ID: string) => {
+	console.log({
 		name: "workers-ai",
 		headers: {
 			Authorization: `Bearer ${API_KEY}`,
 		},
 		baseURL: `https://gateway.ai.cloudflare.com/v1/${ACCOUNT_ID}/ai-checker/workers-ai/v1/`,
 	});
+	return createOpenAICompatible({
+		name: "workers-ai",
+		headers: {
+			Authorization: `Bearer ${API_KEY}`,
+		},
+		baseURL: `https://gateway.ai.cloudflare.com/v1/${ACCOUNT_ID}/ai-checker/workers-ai/v1/`,
+	});
+};
 
 export async function delay(delayInMs?: number): Promise<void> {
 	return delayInMs === undefined
@@ -57,7 +65,7 @@ export const getModel = (context: AppLoadContext) => {
 		env !== "PRODUCTION"
 			? ollama("llama3.1", {})
 			: workersai(
-					context.cloudflare.env.CLOUDFLARE_API_KEY,
+					context.cloudflare.env.CLOUDFLARE_API_TOKEN,
 					context.cloudflare.env.CLOUDFLARE_ACCOUNT_ID,
 				)("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 	// return model;
