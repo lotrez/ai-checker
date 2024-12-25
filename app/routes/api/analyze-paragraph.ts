@@ -2,7 +2,6 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { streamObject } from "ai";
 import { ollama } from "ollama-ai-provider";
 import { z } from "zod";
-import { getContext } from "~/load-context";
 import type { Route } from "./+types/analyze-paragraph";
 
 const ERROR_POSITION = z.object({
@@ -84,17 +83,17 @@ const ANALYZE_ACTION_SCHEMA = z.object({
 	text: z.string(),
 });
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
 	const jsonBody = await request.json();
 	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
 	console.log({ paragraph });
 	if (!paragraph) return Error("No text");
-	const env = getContext().cloudflare.env.ENVIRONMENT;
+	const env = context.cloudflare.env.ENVIRONMENT;
 	const object = streamObject({
 		model:
 			env !== "PRODUCTION"
 				? ollama("llama3.1", {})
-				: workersai(getContext().cloudflare.env.CF_API_KEY)(
+				: workersai(context.cloudflare.env.CF_API_KEY)(
 						"@cf/meta/llama-3.3-70b-instruct-fp8-fast",
 					),
 		schemaName: "Analysis",

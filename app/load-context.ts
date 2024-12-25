@@ -25,17 +25,3 @@ declare module "react-router" {
 export function getLoadContext({ context }: GetLoadContextArgs) {
 	return context;
 }
-
-// Create a context holder
-let workerContext: GetLoadContextArgs["context"] | null = null;
-
-export function setContext(context: GetLoadContextArgs["context"]) {
-	workerContext = context;
-}
-
-export function getContext(): GetLoadContextArgs["context"] {
-	if (!workerContext) {
-		throw new Error("Context not initialized");
-	}
-	return workerContext;
-}
