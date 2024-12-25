@@ -1,7 +1,7 @@
 import { experimental_useObject as useObject } from "ai/react";
-import type { z } from "node_modules/zod/lib/external";
 import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
+import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
 import GradingCard from "~/components/editor/cards/grading-card";
 import Paragraph from "~/components/editor/paragraph";
@@ -52,7 +52,7 @@ export default function Editor() {
 	};
 
 	return (
-		<div className="grid gap-4 grid-cols-2 mx-auto w-full md:max-w-[1200px] h-full">
+		<div className="grid gap-4 md:grid-cols-2 grid-cols-1 mx-auto w-full md:max-w-[1200px] h-full">
 			<GradingCard
 				grading={
 					object?.grading as Partial<z.infer<typeof GRADE_SCHEMA>["grading"]>
