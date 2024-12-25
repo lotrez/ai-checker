@@ -114,6 +114,7 @@ export const getModel = (context: AppLoadContext) => {
 				}
 				// If not cached, proceed with streaming
 				const { stream, ...rest } = await doStream();
+				console.log({ rest });
 				const fullResponse: LanguageModelV1StreamPart[] = [];
 				const transformStream = new TransformStream<
 					LanguageModelV1StreamPart,
