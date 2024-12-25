@@ -1,9 +1,15 @@
-import { useMemo, useState } from "react";
+import { experimental_useObject as useObject } from "ai/react";
+import type { z } from "node_modules/zod/lib/external";
+import { useEffect, useMemo, useState } from "react";
+import { useDebounce } from "use-debounce";
+import AiCard from "~/components/editor/cards/ai-card";
+import GradingCard from "~/components/editor/cards/grading-card";
 import Paragraph from "~/components/editor/paragraph";
 import Viewer from "~/components/editor/viewer";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
 import type { Route } from "./+types/editor";
+import { GRADE_SCHEMA } from "./api/grade";
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -19,6 +25,22 @@ export function meta({}: Route.MetaArgs) {
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
 
+	const { object, submit, stop, isLoading } = useObject({
+		api: "/api/grade",
+		schema: GRADE_SCHEMA,
+		headers: new Headers({
+			"Content-Type": "application/json",
+		}),
+	});
+
+	const [debouncedText] = useDebounce(text, 500);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		stop();
+		if (debouncedText.trim() !== "") submit({ text: debouncedText });
+	}, [debouncedText]);
+
 	const splitText = useMemo(() => {
 		// Split on double newlines and filter empty paragraphs
 		const splits = text.split(/\n\s*\n/).filter((p) => p.trim());
@@ -31,6 +53,20 @@ export default function Editor() {
 
 	return (
 		<div className="grid gap-4 grid-cols-2 mx-auto w-full md:max-w-[1200px] h-full">
+			<GradingCard
+				grading={
+					object?.grading as Partial<z.infer<typeof GRADE_SCHEMA>["grading"]>
+				}
+				loading={isLoading}
+			/>
+			<AiCard
+				loading={isLoading}
+				ai={
+					object?.aiDetection as Partial<
+						z.infer<typeof GRADE_SCHEMA>["aiDetection"]
+					>
+				}
+			/>
 			<Card className="flex flex-col">
 				<CardHeader>
 					<CardTitle>Edit your text</CardTitle>

@@ -55,7 +55,6 @@ export default function Paragraph({
 	handleAcceptProposition,
 }: {
 	text: string;
-
 	handleAcceptProposition: (proposedText: string, oldText: string) => void;
 }) {
 	const { object, submit, stop, isLoading } = useObject({

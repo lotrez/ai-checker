@@ -16,7 +16,9 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 			.array(z.string())
 			.min(1)
 			.max(5)
-			.describe("Your proposed fixes for the bad grammar."),
+			.describe(
+				"Your proposed fixes for the bad grammar. This should be a drop in replacement.",
+			),
 	}),
 	z.object({
 		type: z.literal("STYLE_IMPROVEMENT"),
@@ -25,7 +27,9 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 			.array(z.string())
 			.min(1)
 			.max(5)
-			.describe("Your proposed fixes for the bad wording."),
+			.describe(
+				"Your proposed fixes for the bad wording. This should be a drop in replacement.",
+			),
 		position: ERROR_POSITION,
 	}),
 ]);
