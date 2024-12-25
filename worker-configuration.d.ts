@@ -3,7 +3,7 @@
 interface Env {
 	KV_AI_CACHE: KVNamespace;
 	ENVIRONMENT: string;
-	CLOUDFLARE_API_KEY: string;
+	CLOUDFLARE_API_TOKEN: string;
 	CLOUDFLARE_ACCOUNT_ID: string;
 	AI: Ai;
 }
