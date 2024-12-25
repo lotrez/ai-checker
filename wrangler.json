@@ -1,7 +1,7 @@
 {
   "name": "ai-checker",
   "main": "./server.ts",
-  "compatibility_date": "2024-03-04",
+  "compatibility_date": "2024-09-23",
   "compatibility_flags": [
     "nodejs_compat"
   ],
