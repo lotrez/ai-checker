@@ -9,6 +9,7 @@ import Viewer from "~/components/editor/viewer";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
 import type { Route } from "./+types/editor";
+import { ANALYSIS_SCHEMA, type AnalysisResults } from "./api/analyze-paragraph";
 import { GRADE_SCHEMA } from "./api/grade";
 
 export function meta({}: Route.MetaArgs) {
@@ -25,9 +26,27 @@ export function meta({}: Route.MetaArgs) {
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
 
-	const { object, submit, stop, isLoading } = useObject({
+	const {
+		object: gradeObject,
+		submit: gradeSubmit,
+		stop: gradeStop,
+		isLoading: gradeLoading,
+	} = useObject({
 		api: "/api/grade",
 		schema: GRADE_SCHEMA,
+		headers: new Headers({
+			"Content-Type": "application/json",
+		}),
+	});
+
+	const {
+		object: analyzeObject,
+		submit: analyzeSubmit,
+		stop: analyzeStop,
+		isLoading: analyzeLoading,
+	} = useObject({
+		api: "/api/analyze-paragraph",
+		schema: ANALYSIS_SCHEMA,
 		headers: new Headers({
 			"Content-Type": "application/json",
 		}),
@@ -37,8 +56,8 @@ export default function Editor() {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		stop();
-		if (debouncedText.trim() !== "") submit({ text: debouncedText });
+		gradeStop();
+		if (debouncedText.trim() !== "") gradeSubmit({ text: debouncedText });
 	}, [debouncedText]);
 
 	const splitText = useMemo(() => {
@@ -46,6 +65,19 @@ export default function Editor() {
 		const splits = text.split(/\n\s*\n/).filter((p) => p.trim());
 		return splits;
 	}, [text]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		if (splitText.length === 0) return;
+		analyzeStop();
+		analyzeSubmit(
+			splitText.map((t) => {
+				return {
+					text: t,
+				};
+			}),
+		);
+	}, [splitText]);
 
 	const handleAcceptProposition = (improvement: string, errorText: string) => {
 		setText((oldText) => oldText.replaceAll(errorText, improvement));
@@ -55,14 +87,16 @@ export default function Editor() {
 		<div className="grid gap-4 md:grid-cols-2 grid-cols-1 mx-auto w-full md:max-w-[1200px] h-full">
 			<GradingCard
 				grading={
-					object?.grading as Partial<z.infer<typeof GRADE_SCHEMA>["grading"]>
+					gradeObject?.grading as Partial<
+						z.infer<typeof GRADE_SCHEMA>["grading"]
+					>
 				}
-				loading={isLoading}
+				loading={gradeLoading}
 			/>
 			<AiCard
-				loading={isLoading}
+				loading={gradeLoading}
 				ai={
-					object?.aiDetection as Partial<
+					gradeObject?.aiDetection as Partial<
 						z.infer<typeof GRADE_SCHEMA>["aiDetection"]
 					>
 				}
@@ -85,6 +119,10 @@ export default function Editor() {
 					<Paragraph
 						key={`p-${i}`}
 						text={t}
+						errors={
+							analyzeObject?.paragraphsResults?.[i]
+								?.errors as AnalysisResults["paragraphsResults"][number]["errors"]
+						}
 						handleAcceptProposition={handleAcceptProposition}
 					/>
 				))}

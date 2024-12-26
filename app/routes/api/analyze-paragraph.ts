@@ -35,8 +35,21 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 ]);
 
 export const ANALYSIS_SCHEMA = z.object({
-	errors: z.array(ERROR_UNION),
+	paragraphsResults: z.array(
+		z
+			.object({
+				paragraphId: z
+					.string()
+					.describe("The id of the paragraph provided int he original prompt."),
+				errors: z.array(ERROR_UNION),
+			})
+			.describe(
+				"A list of what the results of the analysis on each paragraph.",
+			),
+	),
 });
+
+export type AnalysisResults = z.infer<typeof ANALYSIS_SCHEMA>;
 
 const SYSTEM_PROMPT = (
 	env: string,
@@ -55,32 +68,43 @@ Do not say anything other than the JSON requested.`
 		: ""
 }`;
 
-const getMessagePrompt = (text: string) => {
-	return `Analyze the following paragraph based on the following criteria:
+const ANALYZE_ACTION_SCHEMA = z.array(
+	z.object({
+		text: z.string(),
+		paragraphId: z.string().optional(),
+	}),
+);
+
+const getMessagePrompt = (
+	paragraphs: z.infer<typeof ANALYZE_ACTION_SCHEMA>,
+) => {
+	return `Analyze all of the following paragraphs based on the following criteria:
 1. **Grammar and Syntax**: Identify and correct errors.
 2. **Stylistic Improvements**: Highlight awkward or poorly worded sentences and suggest improvements.
 
-Here is the paragraph:
-${text}
+Here are the paragraphs:
+${JSON.stringify(paragraphs, null, 2)}
 `;
 };
 
-const ANALYZE_ACTION_SCHEMA = z.object({
-	text: z.string(),
-});
-
 export async function action({ request, context }: Route.ActionArgs) {
-	const jsonBody = await request.json();
-	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
-	console.log({ paragraph });
-	if (!paragraph) return Error("No text");
+	const body = ANALYZE_ACTION_SCHEMA.parse(await request.json());
+	console.log({ body });
+	if (body.length === 0) return new Response();
 	const env = context.cloudflare.env.ENVIRONMENT;
+
+	// set hash for each text
+	body.map((b, i) => {
+		return { ...b, paragraphId: i + 1 };
+	});
+	console.log({ body });
+
 	const object = streamObject({
 		model: getModel(context),
 		schemaName: "Analysis",
 		schemaDescription: "Analysis results",
 		schema: ANALYSIS_SCHEMA,
-		prompt: getMessagePrompt(paragraph.toString()),
+		prompt: getMessagePrompt(body),
 		system: SYSTEM_PROMPT(env),
 		mode: getMode(context),
 	});

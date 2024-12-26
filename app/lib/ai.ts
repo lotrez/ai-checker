@@ -63,7 +63,7 @@ export const getModel = (context: AppLoadContext) => {
 	const env = context.cloudflare.env.ENVIRONMENT;
 	const model =
 		env !== "PRODUCTION"
-			? ollama("llama3.1", {})
+			? ollama("llama3.1")
 			: workersai(
 					context.cloudflare.env.CLOUDFLARE_API_TOKEN,
 					context.cloudflare.env.CLOUDFLARE_ACCOUNT_ID,

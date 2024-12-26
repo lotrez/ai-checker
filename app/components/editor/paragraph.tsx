@@ -1,8 +1,9 @@
-import { experimental_useObject as useObject } from "ai/react";
-import { useEffect, useMemo } from "react";
-import { useDebounce } from "use-debounce";
+import { useMemo } from "react";
 import type { z } from "zod";
-import { ANALYSIS_SCHEMA } from "~/routes/api/analyze-paragraph";
+import type {
+	ANALYSIS_SCHEMA,
+	AnalysisResults,
+} from "~/routes/api/analyze-paragraph";
 import ErrorPopover from "./error-popover";
 
 const getPosition = (text: string, textToBeFound: string) => {
@@ -53,37 +54,18 @@ export function removeOverlappingErrors(
 export default function Paragraph({
 	text,
 	handleAcceptProposition,
+	errors,
 }: {
 	text: string;
 	handleAcceptProposition: (proposedText: string, oldText: string) => void;
+	errors?: AnalysisResults["paragraphsResults"][number]["errors"];
 }) {
-	const { object, submit, stop, isLoading } = useObject({
-		api: "/api/analyze-paragraph",
-		schema: ANALYSIS_SCHEMA,
-		headers: new Headers({
-			"Content-Type": "application/json",
-		}),
-	});
-
-	const [debouncedText] = useDebounce(text, 500);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		stop();
-		if (debouncedText.trim() !== "") submit({ text: debouncedText });
-	}, [debouncedText]);
-
 	const renderedText = useMemo(() => {
-		if (object?.errors && object?.errors.length > 0) {
+		if (errors && errors.length > 0) {
 			let lastErrorend = 0;
 			const elements = [];
 
-			for (const error of removeOverlappingErrors(
-				object.errors as Partial<
-					z.infer<typeof ANALYSIS_SCHEMA>["errors"][number]
-				>[],
-				text,
-			)) {
+			for (const error of removeOverlappingErrors(errors, text)) {
 				if (!error || !error.position?.errorText) continue;
 				const position = getPosition(text, error.position.errorText);
 				// partir de la derniere erreur et rajouter un span jusqu'a l'erreur de la loop
@@ -96,7 +78,7 @@ export default function Paragraph({
 				elements.push(
 					<ErrorPopover
 						handleAcceptProposition={handleAcceptProposition}
-						error={error as z.infer<typeof ANALYSIS_SCHEMA>["errors"][number]}
+						error={error}
 						text={text.substring(position.start, position.end)}
 						key={`${position.start}-${position.end}-${error.type}`}
 						data-key={`${position.start}-${position.end}-${error.type}`}
@@ -113,12 +95,12 @@ export default function Paragraph({
 			return elements;
 		}
 		return [<span key={"whole-text"}>{text}</span>];
-	}, [object?.errors, text, handleAcceptProposition]);
+	}, [text, handleAcceptProposition, errors]);
 
 	return (
 		<p
 			className={
-				isLoading
+				errors === undefined
 					? "box-border p-3 [background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border"
 					: "p-3 box-border border-transparent border-2"
 			}
