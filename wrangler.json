@@ -23,11 +23,5 @@
   },
   "vars": {
     "ENVIRONMENT": "PRODUCTION"
-  },
-  "assets": {
-    "directory": "./build/client"
-  },
-  "build": {
-    "command": "npm run build"
   }
 }
