@@ -2,26 +2,25 @@ export function createHash(input: unknown): string {
 	// Convert input to a stable string representation
 	const str = JSON.stringify(sortObject(input));
 
-	// Initial hash as number (FNV-1a)
-	let hash = 2166136261;
+	// MurmurHash3 algorithm (32-bit)
+	let hash = 0x811c9dc5; // Seed
 	for (let i = 0; i < str.length; i++) {
 		hash ^= str.charCodeAt(i);
-		hash +=
-			(hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-	}
-	hash >>>= 0; // Convert to unsigned 32-bit integer
-
-	// Convert hash to bytes array (8 bytes for better distribution)
-	const bytes = new Uint8Array(8);
-	for (let i = 0; i < 8; i++) {
-		bytes[i] = (hash >> (i * 8)) & 0xff;
+		hash = Math.imul(hash, 0x5bd1e995);
+		hash ^= hash >>> 15;
 	}
 
-	// Convert to base64 and remove padding
-	const base64 = btoa(String.fromCharCode(...bytes)).replace(/=+$/, "");
+	// Convert to base64 to ensure compact output
+	const base64 = btoa(
+		String.fromCharCode(
+			(hash >>> 24) & 0xff,
+			(hash >>> 16) & 0xff,
+			(hash >>> 8) & 0xff,
+			hash & 0xff,
+		),
+	).replace(/=+$/, "");
 
-	// Combine hash and timestamp, ensuring total length is under 400 bytes
-	return `${base64}`;
+	return base64; // Always under 400 bytes due to compact base64 encoding
 }
 
 /**
@@ -29,22 +28,18 @@ export function createHash(input: unknown): string {
  * This handles nested objects and arrays.
  */
 function sortObject(obj: unknown): unknown {
-	// Handle non-objects
 	if (obj === null || typeof obj !== "object") {
 		return obj;
 	}
 
-	// Handle arrays
 	if (Array.isArray(obj)) {
 		return obj.map(sortObject);
 	}
 
-	// Handle objects
 	return Object.keys(obj)
 		.sort()
 		.reduce((result: Record<string, unknown>, key: string) => {
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			result[key] = sortObject((obj as unknown as any)[key]);
+			result[key] = sortObject((obj as Record<string, unknown>)[key]);
 			return result;
 		}, {});
 }
