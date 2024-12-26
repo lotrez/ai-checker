@@ -5,6 +5,7 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "pages_build_output_dir": "./build",
   "kv_namespaces": [
     {
       "binding": "KV_AI_CACHE",
@@ -19,7 +20,7 @@
     "enabled": true
   },
   "placement": {
-    "mode": "off"
+    "mode": "smart"
   },
   "vars": {
     "ENVIRONMENT": "PRODUCTION"
