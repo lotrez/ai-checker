@@ -65,7 +65,7 @@ const ANALYZE_ACTION_SCHEMA = z.object({
 	text: z.string(),
 });
 
-export async function action({ request, context }: Route.ActionArgs) {
+export async function action({ request }: Route.ActionArgs) {
 	const jsonBody = await request.json();
 	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
 	console.log({ paragraph });

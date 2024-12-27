@@ -1,6 +1,5 @@
 import { experimental_useObject as useObject } from "ai/react";
 import { type ReactNode, useEffect } from "react";
-import { useDebounce } from "use-debounce";
 import type { z } from "zod";
 import { ANALYSIS_SCHEMA } from "~/routes/api/analyze-paragraph";
 import ErrorPopover from "./error-popover";
@@ -113,10 +112,10 @@ export const renderText = (
 };
 
 export default function Paragraph({
-	text,
 	children,
+	text,
 }: {
-	text: string;
+	text?: string;
 	children: ({
 		isLoading,
 		object,
@@ -132,14 +131,12 @@ export default function Paragraph({
 			"Content-Type": "application/json",
 		}),
 	});
-
-	const [debouncedText] = useDebounce(text, 500);
-
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
+		if (!text) return;
 		stop();
-		if (debouncedText.trim() !== "") submit({ text: debouncedText });
-	}, [debouncedText]);
+		if (text.trim() !== "") submit({ text: text });
+	}, [text]);
 
 	return children({
 		object,

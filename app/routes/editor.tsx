@@ -1,6 +1,6 @@
 import { experimental_useObject as useObject } from "ai/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDebounce } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
 import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
 import GradingCard from "~/components/editor/cards/grading-card";
@@ -33,6 +33,10 @@ export type GradeAnalysisResultAi = Partial<
 
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
+	const [debouncedText, setDebouncedText] = useState(DEFAULT_TEXT);
+	const handleSetDebouncedText = useDebouncedCallback((text: string) => {
+		setDebouncedText(text);
+	}, 500);
 	const textAreaRef = useRef(null);
 	useTextAreaAutoResize(textAreaRef);
 
@@ -49,8 +53,6 @@ export default function Editor() {
 		}),
 	});
 
-	const [debouncedText] = useDebounce(text, 500);
-
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		stop();
@@ -59,12 +61,12 @@ export default function Editor() {
 
 	const splitText = useMemo(() => {
 		// Split on double newlines and filter empty paragraphs
-		const splits = text.split(/\n\s*\n/).filter((p) => p.trim());
+		const splits = debouncedText.split(/\n\s*\n/).filter((p) => p.trim());
 		return splits;
-	}, [text]);
+	}, [debouncedText]);
 
 	const handleAcceptProposition = (improvement: string, errorText: string) => {
-		setText((oldText) => oldText.replaceAll(errorText, improvement));
+		handleChangeText(text.replaceAll(errorText, improvement));
 	};
 
 	const mapErrors = useCallback(
@@ -83,7 +85,6 @@ export default function Editor() {
 					});
 			}
 			for (const aiError of aiErrors) {
-				console.log(aiError);
 				all.push({
 					propositions: aiError.propositions,
 					type: "AI_DETECTED",
@@ -98,6 +99,11 @@ export default function Editor() {
 	const filterOverlap = useCallback(removeOverlappingErrors, []);
 
 	const renderTextMemo = useCallback(renderText, []);
+
+	const handleChangeText = (t: string) => {
+		handleSetDebouncedText(t);
+		setText(t);
+	};
 
 	return (
 		<div className="grid gap-4 md:grid-cols-2 grid-cols-1 mx-auto w-full md:max-w-[1200px] h-full">
@@ -125,13 +131,13 @@ export default function Editor() {
 						ref={textAreaRef}
 						value={text}
 						className="min-h-[500px] h-full text-base md:text-base []"
-						onChange={(v) => setText(v.currentTarget.value)}
+						onChange={(v) => handleChangeText(v.currentTarget.value)}
 					/>
 				</CardContent>
 			</Card>
 
 			<Viewer>
-				{splitText.map((t) => (
+				{splitText.map((t, i) => (
 					<Paragraph key={`p-${t.substring(40)}`} text={t}>
 						{({ isLoading, object }) => (
 							<p
