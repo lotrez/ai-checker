@@ -2,6 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
 	darkMode: ["class"],
+	safelist: [
+		{
+			pattern: /(bg|border)-(amber|sky|fuchsia)-(200)/,
+			variants: ["lg", "hover", "focus", "lg:hover"],
+		},
+	],
 	content: ["./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}"],
 	theme: {
 		extend: {

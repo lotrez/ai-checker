@@ -8,16 +8,16 @@ export const ERROR_MAPPINGS: {
 		color: string;
 	};
 } = {
-	GRAMMAR_ERROR: { title: "Erreur de grammaire", color: "bg-fuchsia-200" },
+	GRAMMAR_ERROR: { title: "Erreur de grammaire", color: "fuchsia-200" },
 	STYLE_IMPROVEMENT: {
 		title: "Possibilité d'amélioration",
-		color: "bg-sky-200",
+		color: "sky-200",
 	},
 	AI_DETECTED: {
 		title: "IA Détectée",
-		color: "bg-amber-200",
+		color: "amber-200",
 	},
-};
+} as const;
 
 export default function ErrorPopover({
 	error,
@@ -33,7 +33,7 @@ export default function ErrorPopover({
 		<Popover>
 			<PopoverTrigger asChild>
 				<span
-					className={`${ERROR_MAPPINGS[error.type].color} cursor-pointer rounded`}
+					className={`bg-${ERROR_MAPPINGS[error.type].color} cursor-pointer rounded`}
 				>
 					{text}
 				</span>

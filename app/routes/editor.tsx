@@ -33,6 +33,7 @@ export type GradeAnalysisResultAi = Partial<
 
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
+	const [filter, setFilter] = useState<ErrorDetected["type"] | null>(null);
 	const [debouncedText, setDebouncedText] = useState(DEFAULT_TEXT);
 	const handleSetDebouncedText = useDebouncedCallback((text: string) => {
 		setDebouncedText(text);
@@ -65,9 +66,12 @@ export default function Editor() {
 		return splits;
 	}, [debouncedText]);
 
-	const handleAcceptProposition = (improvement: string, errorText: string) => {
-		handleChangeText(text.replaceAll(errorText, improvement));
-	};
+	const handleAcceptProposition = useCallback(
+		(improvement: string, errorText: string) => {
+			handleChangeText(text.replaceAll(errorText, improvement));
+		},
+		[text],
+	);
 
 	const mapErrors = useCallback(
 		(
@@ -106,6 +110,32 @@ export default function Editor() {
 		setText(t);
 	};
 
+	const errorElements = useCallback(
+		(analysisErrors: ParagraphAnalysisResultErrors, paragraph: string) => {
+			const mergedErrors = mapErrors(
+				analysisErrors,
+				(aiObject?.aiDetection?.aiParts ?? []) as GradeAnalysisResultAi,
+			);
+			const filtered =
+				filter === null
+					? mergedErrors
+					: mergedErrors.filter((e) => e.type === filter);
+			const removedOverlaps = removeOverlappingErrors(filtered, paragraph);
+			return renderTextMemo(
+				removedOverlaps,
+				paragraph,
+				handleAcceptProposition,
+			);
+		},
+		[
+			aiObject?.aiDetection?.aiParts,
+			filter,
+			handleAcceptProposition,
+			mapErrors,
+			renderTextMemo,
+		],
+	);
+
 	return (
 		<div className="grid gap-4 md:grid-cols-2 grid-cols-1 mx-auto w-full md:max-w-[1200px] h-full">
 			<GradingCard
@@ -132,34 +162,33 @@ export default function Editor() {
 						ref={textAreaRef}
 						value={text}
 						className="min-h-[500px] h-full text-base md:text-base []"
-						onChange={(v) => handleChangeText(v.currentTarget.value)}
+						onChange={(v) => {
+							setText(v.currentTarget.value);
+							handleSetDebouncedText(v.currentTarget.value);
+						}}
 					/>
 				</CardContent>
 			</Card>
 
-			<Viewer>
+			<Viewer
+				setFilter={(e) =>
+					setFilter((oldFilter) => (oldFilter === e ? null : e))
+				}
+				currentFilter={filter}
+			>
 				{splitText.map((t, i) => (
 					<Paragraph key={`p-${t.substring(40)}`} text={t}>
 						{({ isLoading, object }) => (
 							<p
 								className={
 									isLoading
-										? "box-border p-3 [background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border"
-										: "p-3 box-border border-transparent border-2"
+										? "box-border py-3 [background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border"
+										: "py-3 box-border border-transparent border-2"
 								}
 							>
-								{renderTextMemo(
-									filterOverlap(
-										mapErrors(
-											(object?.errors ?? []) as ParagraphAnalysisResultErrors,
-											(aiObject?.aiDetection?.aiParts ??
-												[]) as GradeAnalysisResultAi,
-										) ?? [],
-
-										t,
-									),
+								{errorElements(
+									(object?.errors ?? []) as ParagraphAnalysisResultErrors,
 									t,
-									handleAcceptProposition,
 								)}
 							</p>
 						)}
