@@ -84,6 +84,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		prompt: getMessagePrompt(paragraph.toString()),
 		system: SYSTEM_PROMPT(env),
 		mode: getMode(),
+		onFinish: (event) => console.log(event),
 	});
 
 	return returnObjectStream(object);

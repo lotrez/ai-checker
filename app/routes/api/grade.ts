@@ -45,14 +45,6 @@ export const GRADE_SCHEMA = z.object({
 			})
 			.optional(),
 		explainations: z.string().describe("Your overall thoughts ont his paper."),
-		// fixes: z.array(
-		// 	z.object({
-		// 		reasoning: z
-		// 			.string()
-		// 			.describe("Your reasoning as to why this part is bad."),
-		// 		part: z.string().describe("The part you are suggesting the fix to."),
-		// 	}),
-		// ),
 	}),
 });
 
@@ -103,7 +95,7 @@ export async function action({ request }: Route.ActionArgs) {
 		system: SYSTEM_PROMPT(env),
 		mode: getMode(),
 		onFinish(event) {
-			console.log({ usage: event.usage });
+			console.log(event);
 		},
 	});
 
