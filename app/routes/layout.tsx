@@ -4,9 +4,11 @@ export default function Layout() {
 	return (
 		<div className="bg-background text-foreground flex flex-col min-h-screen">
 			<header className="container mx-auto px-4 py-8">
-				<Link to="/">
-					<h1 className="text-4xl font-bold">AI Checker</h1>
-				</Link>
+				<h1 className="text-4xl font-bold">
+					<Link to="/" prefetch="render">
+						AI Checker
+					</Link>
+				</h1>
 			</header>
 
 			<main className="container mx-auto px-4 grow">

@@ -34,12 +34,12 @@ export const GRADE_SCHEMA = z.object({
 			),
 		criteriaBreakdown: z
 			.object({
-				grammar: z.number().min(0).max(5),
-				style: z.number().min(0).max(5),
-				content: z.number().min(0).max(5),
-				originality: z.number().min(0).max(5),
+				grammar: z.number().min(0).max(20),
+				style: z.number().min(0).max(20),
+				content: z.number().min(0).max(20),
+				originality: z.number().min(0).max(20),
 			})
-			.optional(),
+			.describe("Detail each aspect of your grading on a scale from 0 to 20."),
 		explainations: z.string().describe("Your overall thoughts ont his paper."),
 	}),
 });

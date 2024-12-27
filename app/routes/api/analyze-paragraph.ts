@@ -10,7 +10,7 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 		part: z.string().describe("The text you found to be incorrect."),
 		propositions: z
 			.array(z.string())
-			.min(1)
+			.min(0)
 			.max(5)
 			.describe(
 				"A drop in replace to fix the error, will replace the 'part' in the user interface. No explaination, only the text you would replace it with.",
@@ -21,7 +21,7 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 		reasoning: z.string(),
 		propositions: z
 			.array(z.string())
-			.min(1)
+			.min(0)
 			.max(5)
 			.describe(
 				"A drop in replace to fix the error, will replace the 'part' in the user interface. No explaination, only the text you would replace it with.",

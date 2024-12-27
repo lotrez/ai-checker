@@ -61,8 +61,8 @@ export default function Editor() {
 	}, [debouncedText]);
 
 	const splitText = useMemo(() => {
-		// Split on double newlines and filter empty paragraphs
-		const splits = debouncedText.split(/\n\s*\n/).filter((p) => p.trim());
+		// Split on newlines and filter empty paragraphs
+		const splits = debouncedText.split(/\n/).filter((p) => p.trim());
 		return splits;
 	}, [debouncedText]);
 
@@ -177,7 +177,7 @@ export default function Editor() {
 				currentFilter={filter}
 			>
 				{splitText.map((t, i) => (
-					<Paragraph key={`p-${t.substring(40)}`} text={t}>
+					<Paragraph key={`p-${i}`} text={t}>
 						{({ isLoading, object }) => (
 							<p
 								className={
