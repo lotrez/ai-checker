@@ -101,7 +101,8 @@ export default function Editor() {
 	const renderTextMemo = useCallback(renderText, []);
 
 	const handleChangeText = (t: string) => {
-		handleSetDebouncedText(t);
+		// bypass debounce to apply correction instantly
+		setDebouncedText(t);
 		setText(t);
 	};
 
