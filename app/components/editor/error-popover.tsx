@@ -9,14 +9,10 @@ export const ERROR_MAPPINGS: {
 		color: string;
 	};
 } = {
-	// AI_DETECTED: {
-	// 	title: "IA Détectée",
-	// 	color: "bg-orange-200",
-	// },
-	GRAMMAR_ERROR: { title: "Erreur de grammaire", color: "bg-red-200" },
+	GRAMMAR_ERROR: { title: "Erreur de grammaire", color: "bg-fuchsia-200" },
 	STYLE_IMPROVEMENT: {
 		title: "Possibilité d'amélioration",
-		color: "bg-green-200",
+		color: "bg-sky-200",
 	},
 };
 

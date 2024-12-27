@@ -5,13 +5,14 @@ import type { Route } from "./+types/grade";
 
 export const GRADE_SCHEMA = z.object({
 	aiDetection: z.object({
-		globalPercentage: z
-			.number()
-			.describe("How much of the text do you think is written by AI."),
 		aiParts: z.array(
 			z
 				.object({
-					part: z.string().describe("A part you think is written by an AI."),
+					part: z
+						.string()
+						.describe(
+							"A part you think is written by an AI. This can mean that the text contains unusual repetition or overly consistent phrasing, an overly balanced structure, lack of personal style or shallow reasoning.",
+						),
 					confidence: z
 						.number()
 						.min(0)

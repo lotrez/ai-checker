@@ -13,9 +13,11 @@ export default function useTextAreaAutoResize(
 		resize();
 		ref.current.addEventListener("keyup", resize);
 		ref.current.addEventListener("change", resize);
+		window.addEventListener("resize", resize);
 		return () => {
 			ref.current?.removeEventListener("change", resize);
 			ref.current?.removeEventListener("keyup", resize);
+			window.removeEventListener("resize", resize);
 		};
 	}, [ref, resize]);
 

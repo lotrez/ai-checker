@@ -19,7 +19,7 @@ export default function GradingCard({
 				<CardTitle className="text-sm flex items-center justify-between text-blue-700">
 					<div className="flex items-center">
 						<GraduationCap className="mr-2 h-4 w-4" />
-						Grade: {grading?.grade || "N/A"}
+						Grade: {grading?.grade || "N/A"}/20
 					</div>
 				</CardTitle>
 			</CardHeader>
