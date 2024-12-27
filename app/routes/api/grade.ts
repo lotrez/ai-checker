@@ -90,17 +90,18 @@ const GRADE_ACTION_SCHEMA = z.object({
 	text: z.string(),
 });
 
-export async function action({ request, context }: Route.ActionArgs) {
+export async function action({ request }: Route.ActionArgs) {
 	const body = GRADE_ACTION_SCHEMA.parse(await request.json());
-	const env = context.cloudflare.env.ENVIRONMENT;
+	const env = process.env.ENVIRONMENT;
+	if (!env) throw Error("No ENVIRONMENT defined");
 	const object = streamObject({
-		model: getModel(context),
+		model: getModel(),
 		schemaName: "Grade",
 		schemaDescription: "Grading results",
 		schema: GRADE_SCHEMA,
 		prompt: getMessagePrompt(body.text),
 		system: SYSTEM_PROMPT(env),
-		mode: getMode(context),
+		mode: getMode(),
 		onFinish(event) {
 			console.log({ usage: event.usage });
 		},

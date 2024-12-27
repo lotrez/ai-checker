@@ -74,15 +74,16 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
 	console.log({ paragraph });
 	if (!paragraph) return Error("No text");
-	const env = context.cloudflare.env.ENVIRONMENT;
+	const env = process.env.ENVIRONMENT;
+	if (!env) throw Error("No ENVIRONMENT defined");
 	const object = streamObject({
-		model: getModel(context),
+		model: getModel(),
 		schemaName: "Analysis",
 		schemaDescription: "Analysis results",
 		schema: ANALYSIS_SCHEMA,
 		prompt: getMessagePrompt(paragraph.toString()),
 		system: SYSTEM_PROMPT(env),
-		mode: getMode(context),
+		mode: getMode(),
 	});
 
 	return returnObjectStream(object);
