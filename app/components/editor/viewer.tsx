@@ -19,7 +19,7 @@ export default function Viewer({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="flex justify-between items-start">
+				<CardTitle className="flex justify-between items-start flex-col md:flex-row gap-2 flex-wrap">
 					Analysis
 					<span className="flex gap-2">
 						{Object.keys(ERROR_MAPPINGS).map((error) => (
@@ -27,7 +27,7 @@ export default function Viewer({
 								variant="outline"
 								key={error}
 								onClick={() => setFilter(error as ErrorDetected["type"])}
-								className={`border-${getErrorMapping(error).color} border-2 text-secondary-foreground cursor-pointer hover:bg-${getErrorMapping(error).color} ${currentFilter === error ? `bg-${getErrorMapping(error).color}` : ""}`}
+								className={`border-${getErrorMapping(error).color} text-center border-2 text-secondary-foreground cursor-pointer hover:bg-${getErrorMapping(error).color} ${currentFilter === error ? `bg-${getErrorMapping(error).color}` : ""}`}
 							>
 								{getErrorMapping(error).title}
 							</Badge>

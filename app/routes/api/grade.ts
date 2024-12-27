@@ -46,10 +46,10 @@ export const GRADE_SCHEMA = z.object({
 
 const SYSTEM_PROMPT = (
 	env: string,
-) => `You are a professional and multi-lingual text analyzer specializing in identifying and correcting grammar errors, improving sentence structure, and detecting potential AI-generated text. Your task is to grade a paper based on these criteria:
-1. **Grammar and Syntax**: Identify and correct any grammatical, spelling, or punctuation errors and suggest fixes.
-2. **Stylistic Improvements**: Highlight poorly worded sentences or awkward phrasing and suggest more effective alternatives.
-3. **AI Detection Doubts**: Identify any part of text you think could have been written by an AI.
+) => `You are a professional and multi-lingual, one of the best, text analyzer specializing in identifying and correcting grammar errors, improving sentence structure, and detecting potential AI-generated text. 
+Your task is to grade a paper based on these criteria:
+1. **AI Detection Doubts**: Identify any part of text you think could have been written by an AI.
+2. **Grading**: You will grade this paper and provide feedback for the user to improve on.
 Provide your feedback in a structured format with actionable insights and corrections.
 Any fix you suggest will be written with greater burstiness and perplexity than usual.
 ${
@@ -62,9 +62,9 @@ Do not say anything other than the JSON requested.`
 
 const getMessagePrompt = (text: string) => {
 	return `Analyze the following paper based on the following criteria:
-1. **Grammar and Syntax**: Identify and correct errors.
-2. **Stylistic Improvements**: Highlight awkward or poorly worded sentences and suggest improvements.
-3. **AI Detection Doubts**: Identify any part of text you think could have been written by an AI.
+1. **AI Detection Doubts**: Identify any part of text you think could have been written by an AI.
+2. **Grading**: You will grade this paper and provide feedback for the user to improve on.
+
 
 Language Analysis Requested: Auto-detect
 
