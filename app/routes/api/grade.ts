@@ -23,7 +23,7 @@ export const GRADE_SCHEMA = z.object({
 					fix: z
 						.array(z.string())
 						.describe(
-							"Fix suggestions that could bypass this AI detection, mostly with greater burstiness or perplexity.",
+							"Fix suggestions that could bypass this AI detection, mostly with greater burstiness or perplexity. This needs to be a drop in replacement. No explaination, only the text you would replace it with.",
 						),
 				})
 				.describe("Parts of the text you think is written by an AI."),
