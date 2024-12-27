@@ -11,4 +11,5 @@ export default [
 		route("editor", "routes/editor.tsx"),
 	]),
 	route("api/analyze-paragraph", "routes/api/analyze-paragraph.ts"),
+	route("api/grade", "routes/api/grade.ts"),
 ] satisfies RouteConfig;

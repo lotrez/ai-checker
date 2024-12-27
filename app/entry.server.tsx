@@ -2,7 +2,6 @@ import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server.browser";
 import type { AppLoadContext, EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
-import { setContext } from "./load-context";
 
 export default async function handleRequest(
 	request: Request,
@@ -11,10 +10,7 @@ export default async function handleRequest(
 	routerContext: EntryContext,
 	_loadContext: AppLoadContext,
 ) {
-	console.log(_loadContext);
-	setContext(_loadContext);
 	const userAgent = request.headers.get("user-agent");
-
 	const stream = await renderToReadableStream(
 		<ServerRouter context={routerContext} url={request.url} />,
 		{

@@ -1,6 +1,4 @@
-import { useContext } from "react";
 import type { z } from "zod";
-import { EditorContext } from "~/context/editor-context";
 import type { ANALYSIS_SCHEMA } from "../../routes/api/analyze-paragraph";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -25,17 +23,12 @@ export const ERROR_MAPPINGS: {
 export default function ErrorPopover({
 	error,
 	text,
+	handleAcceptProposition,
 }: {
 	error: z.infer<typeof ANALYSIS_SCHEMA>["errors"][number];
 	text: string;
+	handleAcceptProposition: (proposedText: string, oldText: string) => void;
 }) {
-	const editorContext = useContext(EditorContext);
-	const handleAcceptProposition = (improvement: string) => {
-		editorContext.setText(
-			editorContext.text.replaceAll(error.position.errorText, improvement),
-		);
-	};
-
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
@@ -58,7 +51,12 @@ export default function ErrorPopover({
 										<Button
 											variant={"outline"}
 											key={proposition}
-											onClick={() => handleAcceptProposition(proposition)}
+											onClick={() =>
+												handleAcceptProposition(
+													proposition,
+													error.position.errorText,
+												)
+											}
 											className="whitespace-normal h-auto"
 										>
 											{proposition}
@@ -67,9 +65,6 @@ export default function ErrorPopover({
 								</div>
 							</>
 						)}
-					{/* {error.type === "AI_DETECTED" && (
-						<p>Chances d'IA: {error.confidence}%</p>
-					)} */}
 				</div>
 			</PopoverContent>
 		</Popover>

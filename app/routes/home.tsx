@@ -32,7 +32,7 @@ export default function Home() {
 				<p className="text-xl mb-8">
 					Improve clarity, style, and impact in seconds
 				</p>
-				<Link to="/editor">
+				<Link to="/editor" prefetch="render">
 					<Button size="lg">
 						Try It Now
 						<ArrowRight className="ml-2 h-4 w-4" />

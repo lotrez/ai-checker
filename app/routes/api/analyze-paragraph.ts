@@ -1,8 +1,6 @@
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { streamObject } from "ai";
-import { ollama } from "ollama-ai-provider";
 import { z } from "zod";
-import { getContext } from "~/load-context";
+import { getMode, getModel, returnObjectStream } from "~/lib/ai";
 import type { Route } from "./+types/analyze-paragraph";
 
 const ERROR_POSITION = z.object({
@@ -18,18 +16,10 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 			.array(z.string())
 			.min(1)
 			.max(5)
-			.describe("Your proposed fixes for the bad grammar."),
+			.describe(
+				"Your proposed fixes for the bad grammar. This should be a drop in replacement.",
+			),
 	}),
-	// z.object({
-	// 	type: z.literal("AI_DETECTED"),
-	// 	reasoning: z.string(),
-	// 	position: ERROR_POSITION,
-	// 	confidence: z
-	// 		.number()
-	// 		.describe(
-	// 			"How much are you confident that this text is AI generated in a percent.",
-	// 		),
-	// }),
 	z.object({
 		type: z.literal("STYLE_IMPROVEMENT"),
 		reasoning: z.string(),
@@ -37,7 +27,9 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 			.array(z.string())
 			.min(1)
 			.max(5)
-			.describe("Your proposed fixes for the bad wording."),
+			.describe(
+				"Your proposed fixes for the bad wording. This should be a drop in replacement.",
+			),
 		position: ERROR_POSITION,
 	}),
 ]);
@@ -56,8 +48,10 @@ Try to not get overlapping errors. Answer in the same language as the one provid
 You will write any fix or proposition with greater burstiness and perplexity than usual.
 ${
 	env === "PRODUCTION"
-		? `Return only a plain JSON object without including it in a code block with markdown formatting. 
-Just a plain JSON object. Do not include any markdown formatting in your response.`
+		? `**IMPORTANT**
+Return only a plain JSON object. 
+Do not include any markdown formatting in your response.
+Do not say anything other than the JSON requested.`
 		: ""
 }`;
 
@@ -71,54 +65,26 @@ ${text}
 `;
 };
 
-const workersai = (API_KEY: string) =>
-	createOpenAICompatible({
-		name: "workers-ai",
-		headers: {
-			Authorization: "Bearer Es0gDtGd3F2sM5TZRA2l8AtOFX012i0TYQN5oe2L",
-		},
-		baseURL: `https://gateway.ai.cloudflare.com/v1/${API_KEY}/ai-checker/workers-ai/v1/`,
-	});
-
 const ANALYZE_ACTION_SCHEMA = z.object({
 	text: z.string(),
 });
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
 	const jsonBody = await request.json();
 	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
 	console.log({ paragraph });
 	if (!paragraph) return Error("No text");
-	const env = getContext().cloudflare.env.ENVIRONMENT;
+	const env = process.env.ENVIRONMENT;
+	if (!env) throw Error("No ENVIRONMENT defined");
 	const object = streamObject({
-		model:
-			env !== "PRODUCTION"
-				? ollama("llama3.1", {})
-				: workersai(getContext().cloudflare.env.CF_API_KEY)(
-						"@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-					),
+		model: getModel(),
 		schemaName: "Analysis",
 		schemaDescription: "Analysis results",
 		schema: ANALYSIS_SCHEMA,
 		prompt: getMessagePrompt(paragraph.toString()),
 		system: SYSTEM_PROMPT(env),
-		mode: env !== "PRODUCTION" ? "auto" : "json",
+		mode: getMode(),
 	});
 
-	// Create a TransformStream to handle the chunks properly
-	const { readable, writable } = new TransformStream();
-
-	// Pipe the stream through the TransformStream
-	object.textStream
-		.pipeThrough(new TextEncoderStream())
-		.pipeTo(writable)
-		.catch(console.error);
-
-	return new Response(readable, {
-		headers: {
-			"Content-Type": "text/event-stream",
-			Connection: "keep-alive",
-			"Cache-Control": "no-cache",
-		},
-	});
+	return returnObjectStream(object);
 }

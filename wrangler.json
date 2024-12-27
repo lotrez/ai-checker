@@ -1,10 +1,10 @@
 {
   "name": "ai-checker",
-  "main": "./server.ts",
-  "compatibility_date": "2024-03-04",
+  "compatibility_date": "2024-11-11",
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "pages_build_output_dir": "./build/client",
   "kv_namespaces": [
     {
       "binding": "KV_AI_CACHE",
@@ -19,15 +19,9 @@
     "enabled": true
   },
   "placement": {
-    "mode": "off"
+    "mode": "smart"
   },
   "vars": {
     "ENVIRONMENT": "PRODUCTION"
-  },
-  "assets": {
-    "directory": "./build/client"
-  },
-  "build": {
-    "command": "npm run build"
   }
 }
