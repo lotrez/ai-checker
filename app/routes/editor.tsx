@@ -1,18 +1,22 @@
 import { experimental_useObject as useObject } from "ai/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
 import GradingCard from "~/components/editor/cards/grading-card";
-import Paragraph from "~/components/editor/paragraph";
+import Paragraph, {
+	removeOverlappingErrors,
+	renderText,
+	type ErrorDetected,
+	type ParagraphAnalysisResultErrors,
+} from "~/components/editor/paragraph";
 import Viewer from "~/components/editor/viewer";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
 import useTextAreaAutoResize from "~/hooks/use-textarea-autoresize";
-import type { Route } from "./+types/editor";
 import { GRADE_SCHEMA } from "./api/grade";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
 	return [
 		{ title: "AI Text Checker" },
 		{
@@ -23,11 +27,21 @@ export function meta({}: Route.MetaArgs) {
 	];
 }
 
+export type GradeAnalysisResultAi = Partial<
+	z.infer<typeof GRADE_SCHEMA>["aiDetection"]["aiParts"][number]
+>[];
+
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
 	const textAreaRef = useRef(null);
 	useTextAreaAutoResize(textAreaRef);
-	const { object, submit, stop, isLoading } = useObject({
+
+	const {
+		object: aiObject,
+		submit,
+		stop,
+		isLoading,
+	} = useObject({
 		api: "/api/grade",
 		schema: GRADE_SCHEMA,
 		headers: new Headers({
@@ -53,11 +67,43 @@ export default function Editor() {
 		setText((oldText) => oldText.replaceAll(errorText, improvement));
 	};
 
+	const mapErrors = useCallback(
+		(
+			textErrors: ParagraphAnalysisResultErrors,
+			aiErrors: GradeAnalysisResultAi,
+		) => {
+			const all: ErrorDetected[] = [];
+			for (const textError of textErrors) {
+				if (textError.type)
+					all.push({
+						propositions: textError.propositions,
+						reasoning: textError.reasoning,
+						type: textError.type,
+						part: textError.part,
+					});
+			}
+			for (const aiError of aiErrors) {
+				console.log(aiError);
+				all.push({
+					propositions: aiError.propositions,
+					type: "AI_DETECTED",
+					part: aiError.part,
+				});
+			}
+			return all;
+		},
+		[],
+	);
+
+	const filterOverlap = useCallback(removeOverlappingErrors, []);
+
+	const renderTextMemo = useCallback(renderText, []);
+
 	return (
 		<div className="grid gap-4 md:grid-cols-2 grid-cols-1 mx-auto w-full md:max-w-[1200px] h-full">
 			<GradingCard
 				grading={
-					object?.grading as Partial<z.infer<typeof GRADE_SCHEMA>["grading"]>
+					aiObject?.grading as Partial<z.infer<typeof GRADE_SCHEMA>["grading"]>
 				}
 				loading={isLoading}
 			/>
@@ -65,7 +111,7 @@ export default function Editor() {
 				text={text}
 				loading={isLoading}
 				ai={
-					object?.aiDetection as Partial<
+					aiObject?.aiDetection as Partial<
 						z.infer<typeof GRADE_SCHEMA>["aiDetection"]
 					>
 				}
@@ -85,12 +131,32 @@ export default function Editor() {
 			</Card>
 
 			<Viewer>
-				{splitText.map((t, i) => (
-					<Paragraph
-						key={`p-${i}`}
-						text={t}
-						handleAcceptProposition={handleAcceptProposition}
-					/>
+				{splitText.map((t) => (
+					<Paragraph key={`p-${t.substring(40)}`} text={t}>
+						{({ isLoading, object }) => (
+							<p
+								className={
+									isLoading
+										? "box-border p-3 [background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border"
+										: "p-3 box-border border-transparent border-2"
+								}
+							>
+								{renderTextMemo(
+									filterOverlap(
+										mapErrors(
+											(object?.errors ?? []) as ParagraphAnalysisResultErrors,
+											(aiObject?.aiDetection?.aiParts ??
+												[]) as GradeAnalysisResultAi,
+										) ?? [],
+
+										t,
+									),
+									t,
+									handleAcceptProposition,
+								)}
+							</p>
+						)}
+					</Paragraph>
 				))}
 			</Viewer>
 		</div>

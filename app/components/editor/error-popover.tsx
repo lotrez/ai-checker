@@ -1,10 +1,9 @@
-import type { z } from "zod";
-import type { ANALYSIS_SCHEMA } from "../../routes/api/analyze-paragraph";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import type { ErrorDetected } from "./paragraph";
 
 export const ERROR_MAPPINGS: {
-	[key in z.infer<typeof ANALYSIS_SCHEMA>["errors"][number]["type"]]: {
+	[key in ErrorDetected["type"]]: {
 		title: string;
 		color: string;
 	};
@@ -14,6 +13,10 @@ export const ERROR_MAPPINGS: {
 		title: "Possibilité d'amélioration",
 		color: "bg-sky-200",
 	},
+	AI_DETECTED: {
+		title: "IA Détectée",
+		color: "bg-amber-200",
+	},
 };
 
 export default function ErrorPopover({
@@ -21,10 +24,11 @@ export default function ErrorPopover({
 	text,
 	handleAcceptProposition,
 }: {
-	error: z.infer<typeof ANALYSIS_SCHEMA>["errors"][number];
+	error: ErrorDetected;
 	text: string;
 	handleAcceptProposition: (proposedText: string, oldText: string) => void;
 }) {
+	const safePropositions = error.propositions ?? [];
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
@@ -38,29 +42,25 @@ export default function ErrorPopover({
 				<div className="grid gap-4">
 					<p>{ERROR_MAPPINGS[error.type].title}</p>
 					<p>{error.reasoning}</p>
-					{["STYLE_IMPROVEMENT", "GRAMMAR_ERROR"].includes(error.type) &&
-						error.propositions?.length > 0 && (
-							<>
-								<p>Proposition{error.propositions?.length > 1 && "s"}: </p>
-								<div className="flex flex-col gap-2">
-									{error.propositions?.map((proposition) => (
-										<Button
-											variant={"outline"}
-											key={proposition}
-											onClick={() =>
-												handleAcceptProposition(
-													proposition,
-													error.position.errorText,
-												)
-											}
-											className="whitespace-normal h-auto"
-										>
-											{proposition}
-										</Button>
-									))}
-								</div>
-							</>
-						)}
+					{safePropositions.length > 0 && (
+						<>
+							<p>Proposition{safePropositions.length > 1 && "s"}: </p>
+							<div className="flex flex-col gap-2">
+								{error.propositions?.map((proposition) => (
+									<Button
+										variant={"outline"}
+										key={proposition}
+										onClick={() =>
+											handleAcceptProposition(proposition, error.part ?? "")
+										}
+										className="whitespace-normal h-auto"
+									>
+										{proposition}
+									</Button>
+								))}
+							</div>
+						</>
+					)}
 				</div>
 			</PopoverContent>
 		</Popover>

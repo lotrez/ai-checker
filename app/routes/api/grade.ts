@@ -13,15 +13,10 @@ export const GRADE_SCHEMA = z.object({
 						.describe(
 							"A part you think is written by an AI. This can mean that the text contains unusual repetition or overly consistent phrasing, an overly balanced structure, lack of personal style or shallow reasoning.",
 						),
-					confidence: z
-						.number()
-						.min(0)
-						.max(100)
-						.describe(
-							"How confident you are that this part is written by an AI.",
-						),
-					fix: z
+					propositions: z
 						.array(z.string())
+						.min(1)
+						.max(5)
 						.describe(
 							"Fix suggestions that could bypass this AI detection, mostly with greater burstiness or perplexity. This needs to be a drop in replacement. No explaination, only the text you would replace it with.",
 						),

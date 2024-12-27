@@ -3,21 +3,17 @@ import { z } from "zod";
 import { getMode, getModel, returnObjectStream } from "~/lib/ai";
 import type { Route } from "./+types/analyze-paragraph";
 
-const ERROR_POSITION = z.object({
-	errorText: z.string().describe("The text you found to be incorrect."),
-});
-
 export const ERROR_UNION = z.discriminatedUnion("type", [
 	z.object({
 		type: z.literal("GRAMMAR_ERROR"),
 		reasoning: z.string(),
-		position: ERROR_POSITION,
+		part: z.string().describe("The text you found to be incorrect."),
 		propositions: z
 			.array(z.string())
 			.min(1)
 			.max(5)
 			.describe(
-				"Your proposed fixes for the bad grammar. This should be a drop in replacement. No explaination, only the text you would replace it with.",
+				"A drop in replace to fix the error, will replace the 'part' in the user interface. No explaination, only the text you would replace it with.",
 			),
 	}),
 	z.object({
@@ -28,9 +24,9 @@ export const ERROR_UNION = z.discriminatedUnion("type", [
 			.min(1)
 			.max(5)
 			.describe(
-				"Your proposed fixes for the bad wording. This needs to be a drop in replacement. No explaination, only the text you would replace it with.",
+				"A drop in replace to fix the error, will replace the 'part' in the user interface. No explaination, only the text you would replace it with.",
 			),
-		position: ERROR_POSITION,
+		part: z.string().describe("The text you found to be incorrect."),
 	}),
 ]);
 
