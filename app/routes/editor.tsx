@@ -1,5 +1,5 @@
 import { experimental_useObject as useObject } from "ai/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
@@ -8,6 +8,7 @@ import Paragraph from "~/components/editor/paragraph";
 import Viewer from "~/components/editor/viewer";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
+import useTextAreaAutoResize from "~/hooks/use-textarea-autoresize";
 import type { Route } from "./+types/editor";
 import { GRADE_SCHEMA } from "./api/grade";
 
@@ -24,7 +25,8 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
-
+	const textAreaRef = useRef(null);
+	useTextAreaAutoResize(textAreaRef);
 	const { object, submit, stop, isLoading } = useObject({
 		api: "/api/grade",
 		schema: GRADE_SCHEMA,
@@ -73,8 +75,9 @@ export default function Editor() {
 				</CardHeader>
 				<CardContent className="flex-1">
 					<Textarea
+						ref={textAreaRef}
 						value={text}
-						className="min-h-[500px] h-full"
+						className="min-h-[500px] h-full text-base md:text-base []"
 						onChange={(v) => setText(v.currentTarget.value)}
 					/>
 				</CardContent>
