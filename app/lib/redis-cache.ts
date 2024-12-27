@@ -84,8 +84,9 @@ class LocalRedis {
 
 const getRedis = () => {
 	if (process.env.DRAGONFLY_URL === undefined)
-		throw Error("No process.env.DRAGONFLY_URL");
-	return process.env.ENVIRONMENT === "dev"
+		console.warn("WARNING: No DRAGONFLY_URL defined");
+	return process.env.ENVIRONMENT === "dev" ||
+		process.env.DRAGONFLY_URL === undefined
 		? new LocalRedis()
 		: new Redis(process.env.DRAGONFLY_URL);
 };
