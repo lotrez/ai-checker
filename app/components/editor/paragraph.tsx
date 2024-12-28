@@ -106,8 +106,6 @@ export const renderText = (
 				{text.substring(lastErrorend ?? 0, text.length)}
 			</span>,
 		);
-		console.log(text);
-		console.log(elements);
 		return elements;
 	}
 	return [<span key={"whole-text"}>{text}</span>];

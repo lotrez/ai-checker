@@ -62,7 +62,6 @@ export default function Editor() {
 
 	const splitText = useMemo(() => {
 		// Split on newlines and filter empty paragraphs
-		console.log(debouncedText.split(/\n\s*\n/));
 		const splits = debouncedText.split(/\n\s*\n/);
 		return splits;
 	}, [debouncedText]);

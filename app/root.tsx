@@ -6,15 +6,15 @@ import {
 	ScrollRestoration,
 	isRouteErrorResponse,
 } from "react-router";
-
+import { scan } from 'react-scan'; // import this BEFORE react
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 
-// if (typeof window !== "undefined") {
-// 	scan({
-// 		enabled: true,
-// 	});
-// }
+if (typeof window !== "undefined") {
+	scan({
+		enabled: true,
+	});
+}
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
