@@ -6,6 +6,7 @@ import { useDebouncedCallback } from "use-debounce";
 import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
 import GradingCard from "~/components/editor/cards/grading-card";
+import InstructionsCard from "~/components/editor/cards/instructions-card";
 import Paragraph, {
 	removeOverlappingErrors,
 	renderText,
@@ -35,6 +36,7 @@ export type GradeAnalysisResultAi = Partial<
 
 export default function Editor() {
 	const [text, setText] = useState(DEFAULT_TEXT);
+	const [instructions, setInstructions] = useState(DEFAULT_INSTRUCTIONS);
 	const [filter, setFilter] = useState<ErrorDetected["type"] | null>(null);
 	const [debouncedText, setDebouncedText] = useState(DEFAULT_TEXT);
 	const handleSetDebouncedText = useDebouncedCallback((text: string) => {
@@ -59,7 +61,8 @@ export default function Editor() {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		stop();
-		if (debouncedText.trim() !== "") submit({ text: debouncedText });
+		if (debouncedText.trim() !== "")
+			submit({ text: debouncedText, instructions });
 	}, [debouncedText]);
 
 	const splitText = useMemo(() => {
@@ -141,6 +144,10 @@ export default function Editor() {
 
 	return (
 		<div className="grid gap-4 md:grid-cols-2 grid-cols-1 mx-auto w-full md:max-w-[1200px] h-full">
+			<InstructionsCard
+				instructions={instructions}
+				setInstructions={setInstructions}
+			/>
 			<GradingCard
 				grading={
 					aiObject?.grading as Partial<z.infer<typeof GRADE_SCHEMA>["grading"]>
@@ -174,7 +181,7 @@ export default function Editor() {
 									navigator.clipboard.writeText(text);
 									toast.success("Texte copié!", {
 										dismissible: true,
-										icon: <CopyIcon />,
+										richColors: true,
 									});
 								}}
 							/>
@@ -218,6 +225,9 @@ export default function Editor() {
 		</div>
 	);
 }
+
+export const DEFAULT_INSTRUCTIONS =
+	"Write a paper about the healthiness of kebabs.";
 
 export const DEFAULT_TEXT = `Kebabs are often seen as fast food, but when prepared correctly, they can be a healthy and balanced meal option. A kebab typically consists of grilled meat, fresh vegetables, and bread or wraps, making it a versatile and nutrient-rich choice. Here’s why kebabs are not as unhealthy as they are sometimes perceived.
 

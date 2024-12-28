@@ -60,13 +60,21 @@ Do not say anything other than the JSON requested.`
 		: ""
 }`;
 
-const getMessagePrompt = (text: string) => {
+const getMessagePrompt = (text: string, instructions?: string) => {
 	return `Analyze the following paper based on the following criteria:
 1. **AI Detection Doubts**: Identify any part of text you think could have been written by an AI.
 2. **Grading**: You will grade this paper and provide feedback for the user to improve on.
 
+Language Analysis Results Requested: Auto-detect
 
-Language Analysis Requested: Auto-detect
+${
+	instructions
+		? `The user was asked those instructions:
+	${instructions}`
+		: ""
+}
+
+The user was asked those instructions:
 
 Here is the paper:
 ${text}
@@ -87,7 +95,7 @@ export async function action({ request }: Route.ActionArgs) {
 		schemaName: "Grade",
 		schemaDescription: "Grading results",
 		schema: GRADE_SCHEMA,
-		prompt: getMessagePrompt(body.text),
+		prompt: getMessagePrompt(body.text, body.instructions),
 		system: SYSTEM_PROMPT(env),
 		mode: getMode(),
 		onFinish(event) {
