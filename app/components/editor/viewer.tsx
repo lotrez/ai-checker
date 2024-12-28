@@ -18,7 +18,7 @@ export default function Viewer({
 
 	return (
 		<Card>
-			<CardHeader>
+			<CardHeader className="pb-0">
 				<CardTitle className="flex justify-between items-start flex-col md:flex-row gap-2 flex-wrap">
 					Analysis
 					<span className="flex gap-2">
@@ -35,7 +35,9 @@ export default function Viewer({
 					</span>
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="flex flex-col gap-2">{children}</CardContent>
+			<CardContent className="flex flex-col gap-2 px-3 pt-2">
+				{children}
+			</CardContent>
 		</Card>
 	);
 }

@@ -62,7 +62,8 @@ export default function Editor() {
 
 	const splitText = useMemo(() => {
 		// Split on newlines and filter empty paragraphs
-		const splits = debouncedText.split(/\n/).filter((p) => p.trim());
+		console.log(debouncedText.split(/\n\s*\n/));
+		const splits = debouncedText.split(/\n\s*\n/);
 		return splits;
 	}, [debouncedText]);
 
@@ -120,7 +121,7 @@ export default function Editor() {
 				filter === null
 					? mergedErrors
 					: mergedErrors.filter((e) => e.type === filter);
-			const removedOverlaps = removeOverlappingErrors(filtered, paragraph);
+			const removedOverlaps = filterOverlap(filtered, paragraph);
 			return renderTextMemo(
 				removedOverlaps,
 				paragraph,
@@ -133,6 +134,7 @@ export default function Editor() {
 			handleAcceptProposition,
 			mapErrors,
 			renderTextMemo,
+			filterOverlap,
 		],
 	);
 
@@ -180,11 +182,7 @@ export default function Editor() {
 					<Paragraph key={`p-${i}`} text={t}>
 						{({ isLoading, object }) => (
 							<p
-								className={
-									isLoading
-										? "box-border py-3 [background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border"
-										: "py-3 box-border border-transparent border-2"
-								}
+								className={`box-border whitespace-break-spaces px-3 py-2 ${isLoading ? "[background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border" : ""}`}
 							>
 								{errorElements(
 									(object?.errors ?? []) as ParagraphAnalysisResultErrors,
