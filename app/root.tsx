@@ -6,6 +6,7 @@ import {
 	ScrollRestoration,
 	isRouteErrorResponse,
 } from "react-router";
+import { Toaster } from "sonner";
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 
@@ -40,6 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="font-sans">
 				{children}
+				<Toaster />
 				<ScrollRestoration />
 				<Scripts />
 			</body>

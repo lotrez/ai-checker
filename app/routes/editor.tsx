@@ -1,5 +1,7 @@
 import { experimental_useObject as useObject } from "ai/react";
+import { CopyIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
@@ -156,7 +158,28 @@ export default function Editor() {
 			/>
 			<Card className="flex flex-col">
 				<CardHeader>
-					<CardTitle>Edit your text</CardTitle>
+					<CardTitle className="flex justify-between flex-wrap gap-2 md:flex-row flex-col">
+						Edit your text{" "}
+						<span className="flex gap-2">
+							<Trash2Icon
+								className="cursor-pointer"
+								onClick={() => {
+									setText("");
+									setDebouncedText("");
+								}}
+							/>
+							<CopyIcon
+								className="cursor-pointer"
+								onClick={() => {
+									navigator.clipboard.writeText(text);
+									toast.success("Texte copié!", {
+										dismissible: true,
+										icon: <CopyIcon />,
+									});
+								}}
+							/>
+						</span>
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="flex-1">
 					<Textarea

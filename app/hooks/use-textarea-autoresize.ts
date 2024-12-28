@@ -5,6 +5,7 @@ export default function useTextAreaAutoResize(
 ) {
 	const resize = useCallback(() => {
 		if (!ref.current) return;
+		ref.current.style.height = "0px";
 		ref.current.style.height = `${ref.current.scrollHeight + 2}px`;
 	}, [ref]);
 

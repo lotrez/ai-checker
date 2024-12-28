@@ -35,7 +35,7 @@ export default function Viewer({
 					</span>
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="flex flex-col gap-2 px-3 pt-2">
+			<CardContent className="flex flex-col gap-2 px-3 xl:pt-6 pt-0">
 				{children}
 			</CardContent>
 		</Card>
