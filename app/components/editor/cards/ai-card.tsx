@@ -26,7 +26,7 @@ export default function AiCard({
 
 	return (
 		<Card
-			className={`col-span-1 bg-red-50 border-red-200 ${loading && globalPercentage === undefined ? "[background:linear-gradient(45deg,theme(colors.red.50),theme(colors.red.50),theme(colors.red.50))_padding-box,conic-gradient(from_var(--border-angle),theme(colors.red.600/.0)_0%,_theme(colors.red.500)_86%,_theme(colors.red.300)_90%,_theme(colors.red.500)_94%,_theme(colors.red.600/.48))_border-box] border-2 border-transparent animate-border" : ""}`}
+			className={`col-span-1 border-2 bg-red-50 border-red-200 ${loading && globalPercentage === undefined ? "[background:linear-gradient(45deg,hsl(var(--card)),hsl(var(--card)),hsl(var(--card)))_padding-box,conic-gradient(from_var(--border-angle),theme(colors.red.600/.0)_0%,_theme(colors.red.500)_86%,_theme(colors.red.300)_90%,_theme(colors.red.500)_94%,_theme(colors.red.600/.48))_border-box] border-transparent animate-border" : "bg-card"}`}
 		>
 			<CardHeader className="p-4">
 				<CardTitle className="text-sm flex items-center justify-between text-red-700">

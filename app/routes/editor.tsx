@@ -209,16 +209,12 @@ export default function Editor() {
 			>
 				{splitText.map((t, i) => (
 					<Paragraph key={`p-${i}`} text={t}>
-						{({ isLoading, object }) => (
-							<p
-								className={`box-border whitespace-break-spaces px-3 py-2 ${isLoading ? "[background:linear-gradient(45deg,white,white,white)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.indigo.600/.0)_0%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.indigo.600/.48))_border-box] rounded-2xl border-2 border-transparent animate-border" : ""}`}
-							>
-								{errorElements(
-									(object?.errors ?? []) as ParagraphAnalysisResultErrors,
-									t,
-								)}
-							</p>
-						)}
+						{({ object }) =>
+							errorElements(
+								(object?.errors ?? []) as ParagraphAnalysisResultErrors,
+								t,
+							)
+						}
 					</Paragraph>
 				))}
 			</Viewer>

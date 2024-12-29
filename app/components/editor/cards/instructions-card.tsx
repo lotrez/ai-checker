@@ -14,9 +14,9 @@ export default function InstructionsCard({
 	const textAreaRef = useRef(null);
 	useTextAreaAutoResize(textAreaRef);
 	return (
-		<Card className={"col-span-1 md:col-span-2 bg-cyan-50 border-cyan-200"}>
+		<Card className={"col-span-1 md:col-span-2 bg-card border-indigo-400"}>
 			<CardHeader className="p-4">
-				<CardTitle className="text-sm flex items-center justify-between text-cyan-700">
+				<CardTitle className="text-sm flex items-center justify-between text-indigo-700">
 					<div className="flex items-center">
 						<PenIcon className="mr-2 h-4 w-4" />
 						Instructions (optional)

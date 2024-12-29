@@ -8,14 +8,14 @@ export const ERROR_MAPPINGS: {
 		color: string;
 	};
 } = {
-	GRAMMAR_ERROR: { title: "Erreur de grammaire", color: "fuchsia-200" },
+	GRAMMAR_ERROR: { title: "Grammar error", color: "fuchsia-300/70" },
 	STYLE_IMPROVEMENT: {
-		title: "Possibilité d'amélioration",
-		color: "sky-200",
+		title: "Possible improvement",
+		color: "sky-300/70",
 	},
 	AI_DETECTED: {
-		title: "IA Détectée",
-		color: "amber-200",
+		title: "AI Detected",
+		color: "amber-300/70",
 	},
 } as const;
 

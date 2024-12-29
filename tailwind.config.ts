@@ -4,7 +4,7 @@ export default {
 	darkMode: ["class"],
 	safelist: [
 		{
-			pattern: /(bg|border)-(amber|sky|fuchsia)-(200)/,
+			pattern: /(bg|border)-(amber|sky|fuchsia)-(200|300)/,
 			variants: ["lg", "hover", "focus", "lg:hover"],
 		},
 	],
