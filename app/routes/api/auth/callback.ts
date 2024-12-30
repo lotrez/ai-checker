@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { authClient } from "~/lib/auth";
+import {
+	accessTokenCookie,
+	authClient,
+	refreshTokenCookie,
+	subjects,
+} from "~/lib/auth";
+import { createUser, getUserByEmail } from "~/services/user";
 import type { Route } from "./+types/callback";
 import { getRedirectUrl } from "./redirect";
 
@@ -13,14 +19,30 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const body = CALLBACK_SCHEMA.parse({
 		code,
 	});
+	console.log("Callback running", { body });
 	const tokens = await authClient.exchange(body.code, getRedirectUrl());
 	if (tokens.err) throw Error(tokens.err.message);
+	console.log({ tokens });
+	const subject = await authClient.verify<typeof subjects>(
+		subjects,
+		tokens.tokens.access,
+		{ refresh: tokens.tokens.refresh },
+	);
+	if (subject.err) {
+		console.log({ subject });
+		throw Error(subject.err.message);
+	}
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	const email: string = (subject.subject.properties as any).email;
+	let user = await getUserByEmail(email);
+	console.log({ user });
+	if (!user) user = await createUser({ email });
 	return new Response(null, {
 		status: 302, // HTTP status for redirection
 		headers: {
 			"Set-Cookie": [
-				`refresh_token=${tokens.tokens.refresh}; Path=/; HttpOnly; SameSite=Strict`,
-				`access_token=${tokens.tokens.access}; Path=/; HttpOnly; SameSite=Strict`,
+				await refreshTokenCookie.serialize(tokens.tokens.refresh),
+				await accessTokenCookie.serialize(tokens.tokens.access),
 			].join(", "),
 			Location: "/", // Path to redirect the user
 		},

@@ -9,12 +9,7 @@ import {
 import { Toaster } from "sonner";
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
-
-// if (typeof window !== "undefined") {
-// 	scan({
-// 		enabled: true,
-// 	});
-// }
+import { getVerified } from "./lib/auth";
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -25,7 +20,7 @@ export const links: Route.LinksFunction = () => [
 	},
 	{
 		rel: "icon",
-		href: "/public/logo.png",
+		href: "/logo.png",
 		type: "image/png",
 	},
 	{
@@ -34,6 +29,28 @@ export const links: Route.LinksFunction = () => [
 	},
 	{ rel: "stylesheet", href: stylesheet },
 ];
+
+export const meta: Route.MetaFunction = () => {
+	return [
+		{ title: "AI Grader" },
+		{
+			property: "og:title",
+			content: "AI Grader",
+		},
+		{
+			name: "description",
+			content: "Detect errors, AI and improve your papers with the help of AI.",
+		},
+	];
+};
+
+export async function loader({ request }: Route.LoaderArgs) {
+	const verified = await getVerified(request);
+	const isLoggedIn = verified != null;
+	return {
+		isLoggedIn,
+	};
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (

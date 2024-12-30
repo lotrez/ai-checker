@@ -19,17 +19,6 @@ import { Textarea } from "~/components/ui/textarea";
 import useTextAreaAutoResize from "~/hooks/use-textarea-autoresize";
 import { GRADE_SCHEMA } from "./api/grade";
 
-export function meta() {
-	return [
-		{ title: "AI Text Checker" },
-		{
-			name: "description",
-			content:
-				"Check your text for errors, plagiarism or badly worded sentences.",
-		},
-	];
-}
-
 export type GradeAnalysisResultAi = Partial<
 	z.infer<typeof GRADE_SCHEMA>["aiDetection"]["aiParts"][number]
 >[];

@@ -1,8 +1,8 @@
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/web";
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { getEnv } from "./env-helper";
 
 export const turso = createClient({
@@ -12,15 +12,26 @@ export const turso = createClient({
 
 export const db = drizzle(turso);
 
-export const users = sqliteTable("users", {
-	id: text("id")
-		.primaryKey()
-		.$default(() => createId()),
-	email: text("email").notNull().unique(),
-	createdAt: integer("created_at", { mode: "timestamp" })
-		.notNull()
-		.$default(() => sql`CURRENT_TIMESTAMP`),
-});
+export const users = sqliteTable(
+	"users",
+	{
+		id: text("id")
+			.primaryKey()
+			.$default(() => createId()),
+		email: text("email").notNull().unique(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$default(() => sql`CURRENT_TIMESTAMP`),
+	},
+	(table) => {
+		return {
+			emailIdx: index("email_idx").on(table.email),
+		};
+	},
+);
+
+export type InsertUser = typeof users.$inferInsert;
+export type SelectUser = typeof users.$inferSelect;
 
 export const papers = sqliteTable("papers", {
 	id: text("id")

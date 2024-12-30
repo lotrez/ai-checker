@@ -4,7 +4,7 @@ import { getEnv } from "~/lib/env-helper";
 export const getRedirectUrl = () =>
 	getEnv("ENVIRONMENT") === "dev"
 		? "http://localhost:5173/api/auth/callback"
-		: "http://localhost:5173/callback";
+		: "https://ai-checker.coolify.oibruv.fr";
 
 export async function loader() {
 	console.log("redirect");

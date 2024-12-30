@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import type { Route } from "./+types/home";
 
 import { ArrowRight, Edit, RefreshCw, Zap } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -10,17 +9,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-
-export function meta({}: Route.MetaArgs) {
-	return [
-		{ title: "AI Text Checker" },
-		{
-			name: "description",
-			content:
-				"Check your text for errors, plagiarism or badly worded sentences.",
-		},
-	];
-}
 
 export default function Home() {
 	return (
