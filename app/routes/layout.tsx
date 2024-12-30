@@ -1,7 +1,6 @@
 import { Form, Link, Outlet, useRouteLoaderData } from "react-router";
 import { Button } from "~/components/ui/button";
 import type { Route } from "../+types/root";
-import logo from "../public/logo.svg";
 
 export default function Layout() {
 	const rootData =
@@ -10,7 +9,7 @@ export default function Layout() {
 		<div className="bg-background text-foreground flex flex-col min-h-screen">
 			<header className="container mx-auto px-4 py-8 flex justify-between">
 				<h1 className="text-4xl font-medium flex gap-2">
-					<img src={logo} alt="AI Grader logo" />
+					<img src="logo.svg" alt="AI Grader logo" />
 					<Link
 						to="/"
 						prefetch="intent"
