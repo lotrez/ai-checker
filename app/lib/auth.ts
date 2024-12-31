@@ -17,10 +17,7 @@ export const refreshTokenCookie = createCookie("refresh_token", {
 	maxAge: 604_800 * 2, // two weeks
 });
 
-export const getIssHost = () =>
-	getEnv("ENVIRONMENT") !== "PRODUCTION"
-		? "http://localhost:3000"
-		: "https://ai-grader-auth.coolify.oibruv.fr";
+export const getIssHost = () => getEnv("ISS_HSOT");
 
 export const authClient = createClient({
 	clientID: "ai-checker",

@@ -1,10 +1,7 @@
 import { authClient } from "~/lib/auth";
 import { getEnv } from "~/lib/env-helper";
 
-export const getRedirectUrl = () =>
-	getEnv("ENVIRONMENT") === "dev"
-		? "http://localhost:5173/api/auth/callback"
-		: "https://ai-checker.coolify.oibruv.fr/api/auth/callback";
+export const getRedirectUrl = () => getEnv("CALLBACK_URL");
 
 export async function loader() {
 	console.log("redirect");
