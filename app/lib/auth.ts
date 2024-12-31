@@ -17,7 +17,7 @@ export const refreshTokenCookie = createCookie("refresh_token", {
 	maxAge: 604_800 * 2, // two weeks
 });
 
-export const getIssHost = () => getEnv("ISS_HSOT");
+export const getIssHost = () => getEnv("ISS_HOST");
 
 export const authClient = createClient({
 	clientID: "ai-checker",
