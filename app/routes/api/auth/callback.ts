@@ -39,12 +39,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 	if (!user) user = await createUser({ email });
 	return new Response(null, {
 		status: 302, // HTTP status for redirection
-		headers: {
-			"Set-Cookie": [
-				await refreshTokenCookie.serialize(tokens.tokens.refresh),
-				await accessTokenCookie.serialize(tokens.tokens.access),
-			].join(", "),
-			Location: "/", // Path to redirect the user
-		},
+		headers: [
+			["Set-Cookie", await refreshTokenCookie.serialize(tokens.tokens.refresh)],
+			["Set-Cookie", await accessTokenCookie.serialize(tokens.tokens.access)],
+			["Location", "/"],
+		],
 	});
 }

@@ -1,6 +1,6 @@
 import { createSubjects } from "@openauthjs/openauth";
 import { createClient } from "@openauthjs/openauth/client";
-import { createCookie } from "react-router";
+import { createCookie, redirect } from "react-router";
 import { object, string } from "valibot";
 import { getEnv } from "./env-helper";
 
@@ -31,17 +31,43 @@ export const getVerified = async (request: Request) => {
 	const refreshToken = await refreshTokenCookie.parse(
 		request.headers.get("Cookie"),
 	);
+	console.log({ accessToken, refreshToken });
 	if (!accessToken) return null;
 	try {
-		return authClient
-			.verify(subjects, accessToken, {
-				refresh: refreshToken ?? undefined,
-			})
-			.then((res) => {
-				if (res.err) throw Error(res.err.message);
-				return res;
-			});
+		console.log("In try");
+		const verified = authClient.verify(subjects, accessToken, {
+			refresh: refreshToken ?? undefined,
+		});
+		if ((await verified).err) return null;
+		return verified;
 	} catch (e) {
+		console.log("caught");
 		return null;
 	}
+};
+
+export const logout = async () => {
+	const expireRefresh = await refreshTokenCookie.serialize(null, {
+		expires: new Date(0),
+	});
+	const expireAccess = await accessTokenCookie.serialize(null, {
+		expires: new Date(0),
+	});
+
+	return redirect("/", {
+		headers: {
+			"Set-Cookie": [expireRefresh, expireAccess].join(", "),
+			Location: "/", // Path to redirect the user
+		},
+	});
+};
+
+export const hasCookies = async (request: Request) => {
+	const accessToken = await accessTokenCookie.parse(
+		request.headers.get("Cookie"),
+	);
+	const refreshToken = await refreshTokenCookie.parse(
+		request.headers.get("Cookie"),
+	);
+	return refreshToken && accessToken;
 };
