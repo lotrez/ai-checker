@@ -33,17 +33,13 @@ export const getVerified = async (request: Request) => {
 	);
 	console.log({ accessToken, refreshToken });
 	if (!accessToken) return null;
-	try {
-		console.log("In try");
-		const verified = authClient.verify(subjects, accessToken, {
-			refresh: refreshToken ?? undefined,
-		});
-		if ((await verified).err) return null;
-		return verified;
-	} catch (e) {
-		console.log("caught");
-		return null;
-	}
+
+	console.log("In try");
+	const verified = await authClient.verify(subjects, accessToken, {
+		refresh: refreshToken ?? undefined,
+	});
+	if (await verified.err) return null;
+	return verified;
 };
 
 export const logout = async () => {
