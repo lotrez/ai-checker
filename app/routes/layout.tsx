@@ -18,7 +18,6 @@ export default function Layout() {
 						AI Grader
 					</Link>
 				</h1>
-				{JSON.stringify({ rootData })}
 				{rootData?.isLoggedIn === false ? (
 					<Link to="/api/auth/redirect" className="flex gap-2">
 						<Button>Sign in</Button>

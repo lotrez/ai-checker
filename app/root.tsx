@@ -48,6 +48,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const verified = await getVerified(request);
 	console.log({ verified });
 	const isLoggedIn = verified != null;
+	console.log({ isLoggedIn });
 	return {
 		isLoggedIn,
 	};
