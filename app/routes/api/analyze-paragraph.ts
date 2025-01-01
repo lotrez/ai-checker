@@ -51,10 +51,19 @@ Do not say anything other than the JSON requested.`
 		: ""
 }`;
 
-const getMessagePrompt = (text: string) => {
+const getMessagePrompt = (text: string, instructions?: string) => {
 	return `Analyze the following paragraph based on the following criteria:
 1. **Grammar and Syntax**: Identify and correct errors.
 2. **Stylistic Improvements**: Highlight awkward or poorly worded sentences and suggest improvements.
+
+${
+	instructions
+		? `The user has indicated that the paper this paragraph is from had those instructions:
+${instructions}
+
+Take those instructions into account when providing feedback.`
+		: ""
+}
 
 Here is the paragraph:
 ${text}
@@ -63,13 +72,11 @@ ${text}
 
 const ANALYZE_ACTION_SCHEMA = z.object({
 	text: z.string(),
+	instructions: z.string().optional(),
 });
 
 export async function action({ request }: Route.ActionArgs) {
-	const jsonBody = await request.json();
-	const paragraph = ANALYZE_ACTION_SCHEMA.parse(jsonBody).text;
-	console.log({ paragraph });
-	if (!paragraph) return Error("No text");
+	const body = ANALYZE_ACTION_SCHEMA.parse(await request.json());
 	const env = process.env.ENVIRONMENT;
 	if (!env) throw Error("No ENVIRONMENT defined");
 	const object = streamObject({
@@ -77,7 +84,7 @@ export async function action({ request }: Route.ActionArgs) {
 		schemaName: "Analysis",
 		schemaDescription: "Analysis results",
 		schema: ANALYSIS_SCHEMA,
-		prompt: getMessagePrompt(paragraph.toString()),
+		prompt: getMessagePrompt(body.text, body.instructions),
 		system: SYSTEM_PROMPT(env),
 		mode: getMode(),
 		onFinish: (event) => console.log(event),

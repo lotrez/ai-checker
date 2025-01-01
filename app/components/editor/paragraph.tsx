@@ -114,8 +114,10 @@ export const renderText = (
 export default function Paragraph({
 	children,
 	text,
+	instructions,
 }: {
 	text?: string;
+	instructions?: string;
 	children: ({
 		object,
 	}: {
@@ -133,8 +135,8 @@ export default function Paragraph({
 	useEffect(() => {
 		if (!text) return;
 		stop();
-		if (text.trim() !== "") submit({ text: text });
-	}, [text]);
+		if (text.trim() !== "") submit({ text, instructions });
+	}, [text, instructions]);
 
 	return (
 		<p

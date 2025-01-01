@@ -198,7 +198,11 @@ export default function Editor() {
 				currentFilter={filter}
 			>
 				{splitText.map((t, i) => (
-					<Paragraph key={`p-${i}`} text={t}>
+					<Paragraph
+						key={`p-${i}`}
+						text={t}
+						instructions={debouncedInstructions}
+					>
 						{({ object }) =>
 							errorElements(
 								(object?.errors ?? []) as ParagraphAnalysisResultErrors,
