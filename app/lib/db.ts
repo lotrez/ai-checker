@@ -49,3 +49,9 @@ export const papers = sqliteTable("papers", {
 		.notNull()
 		.$default(() => sql`CURRENT_TIMESTAMP`),
 });
+
+export const cache = sqliteTable("cache", {
+	key: text("key").primaryKey(),
+	value: text("value"),
+	updatedAt: integer("updated_at"),
+});

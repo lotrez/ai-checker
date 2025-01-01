@@ -2,7 +2,7 @@ import { experimental_useObject as useObject } from "ai/react";
 import { CopyIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useDebouncedCallback } from "use-debounce";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
 import type { z } from "zod";
 import AiCard from "~/components/editor/cards/ai-card";
 import GradingCard from "~/components/editor/cards/grading-card";
@@ -28,6 +28,7 @@ export default function Editor() {
 	const [instructions, setInstructions] = useState(DEFAULT_INSTRUCTIONS);
 	const [filter, setFilter] = useState<ErrorDetected["type"] | null>(null);
 	const [debouncedText, setDebouncedText] = useState(DEFAULT_TEXT);
+	const [debouncedInstructions] = useDebounce(instructions, 2000);
 	const handleSetDebouncedText = useDebouncedCallback((text: string) => {
 		setDebouncedText(text);
 	}, 500);
@@ -51,8 +52,8 @@ export default function Editor() {
 	useEffect(() => {
 		stop();
 		if (debouncedText.trim() !== "")
-			submit({ text: debouncedText, instructions });
-	}, [debouncedText]);
+			submit({ text: debouncedText, debouncedInstructions });
+	}, [debouncedText, debouncedInstructions]);
 
 	const splitText = useMemo(() => {
 		// Split on newlines and filter empty paragraphs
