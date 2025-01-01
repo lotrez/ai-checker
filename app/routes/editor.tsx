@@ -1,5 +1,10 @@
 import { experimental_useObject as useObject } from "ai/react";
-import { CopyIcon, Trash2Icon } from "lucide-react";
+import {
+	ChevronsLeft,
+	ChevronsRight,
+	CopyIcon,
+	Trash2Icon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -16,6 +21,7 @@ import Paragraph, {
 import Viewer from "~/components/editor/viewer";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
+import useHistory from "~/hooks/use-history";
 import useTextAreaAutoResize from "~/hooks/use-textarea-autoresize";
 import { GRADE_SCHEMA } from "./api/grade";
 
@@ -29,6 +35,12 @@ export default function Editor() {
 	const [filter, setFilter] = useState<ErrorDetected["type"] | null>(null);
 	const [debouncedText, setDebouncedText] = useState(DEFAULT_TEXT);
 	const [debouncedInstructions] = useDebounce(instructions, 2000);
+	const { processDiffs, isAfterAvailable, isBeforeAvailable } = useHistory(
+		(t) => {
+			setText(t);
+			setDebouncedText(t);
+		},
+	);
 	const handleSetDebouncedText = useDebouncedCallback((text: string) => {
 		setDebouncedText(text);
 	}, 500);
@@ -102,6 +114,7 @@ export default function Editor() {
 	const handleChangeText = (t: string) => {
 		// bypass debounce to apply correction instantly
 		setDebouncedText(t);
+		processDiffs(text, t);
 		setText(t);
 	};
 
@@ -158,6 +171,12 @@ export default function Editor() {
 					<CardTitle className="flex justify-between flex-wrap gap-2 md:flex-row flex-col">
 						Edit your text{" "}
 						<span className="flex gap-2">
+							<ChevronsLeft
+								className={`cursor-pointer ${isBeforeAvailable ? "" : "text-muted"}`}
+							/>
+							<ChevronsRight
+								className={`cursor-pointer ${isAfterAvailable ? "" : "text-muted"}`}
+							/>
 							<Trash2Icon
 								className="cursor-pointer"
 								onClick={() => {
@@ -184,6 +203,7 @@ export default function Editor() {
 						value={text}
 						className="min-h-[500px] h-full text-base md:text-base []"
 						onChange={(v) => {
+							processDiffs(text, v.currentTarget.value);
 							setText(v.currentTarget.value);
 							handleSetDebouncedText(v.currentTarget.value);
 						}}
