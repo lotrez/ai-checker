@@ -35,12 +35,16 @@ export default function Editor() {
 	const [filter, setFilter] = useState<ErrorDetected["type"] | null>(null);
 	const [debouncedText, setDebouncedText] = useState(DEFAULT_TEXT);
 	const [debouncedInstructions] = useDebounce(instructions, 2000);
-	const { processDiffs, isAfterAvailable, isBeforeAvailable } = useHistory(
-		(t) => {
-			setText(t);
-			setDebouncedText(t);
-		},
-	);
+	const {
+		processDiffs,
+		isAfterAvailable,
+		isBeforeAvailable,
+		applyNext,
+		applyPrevious,
+	} = useHistory((t) => {
+		setText(t);
+		setDebouncedText(t);
+	});
 	const handleSetDebouncedText = useDebouncedCallback((text: string) => {
 		setDebouncedText(text);
 	}, 500);
@@ -172,10 +176,12 @@ export default function Editor() {
 						Edit your text{" "}
 						<span className="flex gap-2">
 							<ChevronsLeft
-								className={`cursor-pointer ${isBeforeAvailable ? "" : "text-muted"}`}
+								onClick={() => applyPrevious(text)}
+								className={`cursor-pointer ${isBeforeAvailable ? "" : "text-muted pointer-events-none"}`}
 							/>
 							<ChevronsRight
-								className={`cursor-pointer ${isAfterAvailable ? "" : "text-muted"}`}
+								onClick={() => applyNext(text)}
+								className={`cursor-pointer ${isAfterAvailable ? "" : "text-muted pointer-events-none"}`}
 							/>
 							<Trash2Icon
 								className="cursor-pointer"
