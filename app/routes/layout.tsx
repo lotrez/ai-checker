@@ -24,7 +24,7 @@ export default function Layout() {
 						<Button variant="secondary">Register</Button>
 					</Link>
 				) : (
-					<div className="flex gap-2 items-center">
+					<div className="flex gap-8 items-center">
 						<Link to="/papers" className="underline">
 							My papers
 						</Link>
@@ -35,7 +35,7 @@ export default function Layout() {
 				)}
 			</header>
 
-			<main className="container mx-auto px-4 grow">
+			<main className="container mx-auto px-4 md:px-0 grow">
 				<Outlet />
 			</main>
 
